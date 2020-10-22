@@ -42,7 +42,17 @@ development on the FPGA.
     
     This enables the FPGA to be programmed through the USB Blaster II interface
     without using a root account.
-    
+
+
+### Tutorials for using Quartus
+
+Tutorials for using Quartus can be found at the following URL:
+
+https://github.com/intel-iot-devkit/terasic-de10-nano-kit/
+
+All three tutorials mentioned are great reading for getting started with
+programming the FPGA and interfacing with it through Linux.
+
 
 ## Abstract
 
