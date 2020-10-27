@@ -1,0 +1,18 @@
+name: "Presentation PDF"
+on:
+  push:
+    branches:
+      - master
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: cachix/install-nix-action@v10
+    - run: nix-build presentation
+    - name: Upload PDF
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./result
+        force_orphan: true

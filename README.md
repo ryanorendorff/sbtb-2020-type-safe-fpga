@@ -1,5 +1,8 @@
 # Programming Machine Learning Algorithms in Hardware, sanely, using Haskell and Rust!
 
+![Presentation PDF](https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga/workflows/Presentation%20PDF/badge.svg)
+[![Download PDF](https://img.shields.io/badge/-Download%20PDF-blue)](https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga/raw/gh-pages/FormalizingLinearAlgebraAlgorithms.pdf)
+
 Using Depdentent and Affine Types for robust FPGA programming.
 
 Presented at [Scale by the Bay 2020 (SBTB
