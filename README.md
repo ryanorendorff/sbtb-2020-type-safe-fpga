@@ -1,4 +1,4 @@
-# Programming machine learning algorithms in hardware, sanely, using Haskell and Rust!
+# Programming Machine Learning Algorithms in Hardware, sanely, using Haskell and Rust!
 
 Using Depdentent and Affine Types for robust FPGA programming.
 
