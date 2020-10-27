@@ -1,5 +1,5 @@
 let
-  pkgs = import ../nixpkgs.nix;
+  pkgs = import ./nixpkgs.nix;
 
   # Convenient for using the existing .gitignore to automatically untrack
   # unwanted files in src.
