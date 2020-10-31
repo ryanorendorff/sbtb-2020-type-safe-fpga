@@ -1,4 +1,4 @@
-# Programming Machine Learning Algorithms in Hardware, sanely, using Haskell and Rust!
+# Programming Machine Learning Algorithms in Hardware, Sanely, using Haskell and Rust!
 
 ![Presentation PDF](https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga/workflows/Presentation%20PDF/badge.svg)
 [![Download PDF](https://img.shields.io/badge/-Download%20PDF-blue)](https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga/raw/gh-pages/SBTB-2020-Type-Safe-FPGA.pdf)
@@ -55,6 +55,11 @@ https://github.com/intel-iot-devkit/terasic-de10-nano-kit/
 
 All three tutorials mentioned are great reading for getting started with
 programming the FPGA and interfacing with it through Linux.
+
+Additionally, there is a [tutorial for embedded
+linux](https://bitlog.it/20170820_building_embedded_linux_for_the_terasic_de10-nano.html)
+applications. It describes how to build a simple LED component from the Golden
+Hardware Reference Design (GHRD) and build a Linux kernel around it.
 
 
 ## Abstract
