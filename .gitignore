@@ -4,6 +4,9 @@
 ## Nix
 result
 
+# Don't need to save the derivations, only used to add roots to prevent GC
+*.drv
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~
