@@ -9,12 +9,8 @@ import NetworkTypes
 --                      Linear algebra primitives                     --
 ------------------------------------------------------------------------
 
-infixr 7 <+>
-(<+>) :: (KnownNat n, Num a) => Vec n a -> Vec n a -> Vec n a
-(<+>) = zipWith (+)
-
-dotProduct :: (KnownNat n, Num a) => Vec n a -> Vec n a -> a
-dotProduct xs ys = foldr (+) 0 (zipWith (*) xs ys)
+dotProduct :: (KnownNat n, Num a) => Vec (n + 1) a -> Vec (n + 1) a -> a
+dotProduct xs ys = fold (+) (zipWith (*) xs ys)
 
 {-# ANN topEntity
   (Synthesize
@@ -25,8 +21,8 @@ dotProduct xs ys = foldr (+) 0 (zipWith (*) xs ys)
     , t_output = PortName "out"
     }) #-}
 topEntity ::
-  Vec 4 (SFixed 8 8) ->
-  Vec 4 (SFixed 8 8) ->
-  SFixed 8 8
+  Vec 4 (Unsigned 4) ->
+  Vec 4 (Unsigned 4) ->
+  (Unsigned 4)
 topEntity = dotProduct
 {-# NOINLINE topEntity #-}
