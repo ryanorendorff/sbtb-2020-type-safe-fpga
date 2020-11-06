@@ -52,7 +52,6 @@ ho = Weights (1 :> 2 :> Nil) (row1 :> row2 :> Nil)
   where
     row1 = 1 :> 2 :> 3 :> Nil
     row2 = 4 :> 5 :> 6 :> Nil
-    row3 = 7 :> 8 :> 9 :> Nil
 
 exNetwork = ih :&~ hh :&~ O ho :: Network 4 '[3, 3] 2 (Unsigned 32)
 
