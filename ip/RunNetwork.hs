@@ -33,28 +33,28 @@ infixr 8 #>
 ------------------------------------------------------------------------
 
 -- Sample layers
-ih :: Weights 4 3 (SFixed 8 8)
+ih :: Weights 4 3 (Unsigned 32)
 ih = Weights (1 :> 2 :> 3 :> Nil) (row1 :> row2 :> row3 :> Nil)
   where
     row1 = 1 :> 2 :> 3 :> 10 :> Nil
     row2 = 4 :> 5 :> 6 :> 11 :> Nil
     row3 = 7 :> 8 :> 9 :> 12 :> Nil
 
-hh :: Weights  3 3 (SFixed 8 8)
+hh :: Weights  3 3 (Unsigned 32)
 hh = Weights (1 :> 2 :> 3 :> Nil) (row1 :> row2 :> row3 :> Nil)
   where
     row1 = 1 :> 2 :> 3 :> Nil
     row2 = 4 :> 5 :> 6 :> Nil
     row3 = 7 :> 8 :> 9 :> Nil
 
-ho :: Weights  3 2 (SFixed 8 8)
+ho :: Weights  3 2 (Unsigned 32)
 ho = Weights (1 :> 2 :> Nil) (row1 :> row2 :> Nil)
   where
     row1 = 1 :> 2 :> 3 :> Nil
     row2 = 4 :> 5 :> 6 :> Nil
     row3 = 7 :> 8 :> 9 :> Nil
 
-exNetwork = ih :&~ hh :&~ O ho :: Network 4 '[3, 3] 2 (SFixed 8 8)
+exNetwork = ih :&~ hh :&~ O ho :: Network 4 '[3, 3] 2 (Unsigned 32)
 
 
 ------------------------------------------------------------------------
@@ -84,6 +84,6 @@ runNet activation (w :&~ n) v = runNet activation n (map activation (runLayer w 
                  ]
     , t_output = PortName "out"
     }) #-}
-topEntity :: Vec 4 (SFixed 8 8) -> Vec 2 (SFixed 8 8)
+topEntity :: Vec 4 (Unsigned 32) -> Vec 2 (Unsigned 32)
 topEntity = runNet reLU exNetwork
 {-# NOINLINE topEntity #-}
