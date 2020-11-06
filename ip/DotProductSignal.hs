@@ -10,11 +10,11 @@ import NetworkTypes
 --                      Linear algebra primitives                     --
 ------------------------------------------------------------------------
 
-dotProduct :: (KnownDomain dom, KnownNat n, Num a, NFDataX a)
+dotProduct :: (HiddenClockResetEnable dom, KnownNat n, Num a, NFDataX a)
   => Signal dom (Vec (n + 1) a)
   -> Signal dom (Vec (n + 1) a)
   -> Signal dom a
-dotProduct xs ys = fold (+) $ unbundle $ (zipWith (*) <$> xs <*> ys)
+dotProduct xs ys = fold (+) $ unbundle $ register (repeat 0) $ (zipWith (*) <$> xs <*> ys)
 
 {-# ANN topEntity
   (Synthesize
