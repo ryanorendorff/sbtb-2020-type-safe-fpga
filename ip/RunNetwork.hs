@@ -70,18 +70,20 @@ exNetwork = layer1 :&~ layer2 :&~ layer3 :&~ O outputLayer
 --                          Running a network                         --
 ------------------------------------------------------------------------
 
-runLayer :: (KnownNat i, KnownNat o, Num a) => (Weights i o a) -> Vec i a -> Vec o a
-runLayer (Weights biases nodes) v = biases <+> nodes #> v
+runLayer :: (KnownNat i, KnownNat o, Num a)
+         => (Weights i o a)
+         -> Vec i a
+         -> Vec o a
+runLayer (Weights biases nodes activation) v = map activation $ biases <+> nodes #> v
 
 -- Assumes that the last layer is a pure output layer with no activation
 -- function.
 runNet :: (KnownNat i, KnownNat o, Num a, Ord a)
-       => (a -> a)
-       -> Network i hs o a
+       => Network i hs o a
        -> Vec i a
        -> Vec o a
-runNet activation (O w) v = runLayer w v
-runNet activation (w :&~ n) v = runNet activation n (map activation (runLayer w v))
+runNet (O w) v = runLayer w v
+runNet (w :&~ n) v = runNet n (runLayer w v)
 
 
 ------------------------------------------------------------------------
@@ -96,5 +98,5 @@ runNet activation (w :&~ n) v = runNet activation n (map activation (runLayer w 
     , t_output = PortName "out"
     }) #-}
 topEntity :: Vec 2 (SFixed 7 25) -> Vec 1 (SFixed 7 25)
-topEntity = runNet reLU exNetwork
+topEntity = runNet exNetwork
 {-# NOINLINE topEntity #-}

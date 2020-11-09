@@ -13,6 +13,7 @@ type Matrix m n a = Vec m (Vec n a)
 data Weights (m :: Nat) (n :: Nat) a =
   Weights { biases :: Vec n a
           , nodes :: Matrix n m a
+          , activation :: a -> a
           }
 
 data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
