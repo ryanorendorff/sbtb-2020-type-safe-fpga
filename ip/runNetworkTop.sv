@@ -15,7 +15,7 @@ module runNetworkTop(
  
 logic [31:0] a, b;
 wire [63:0] in; 
-assign in = {a, b, c, d};
+assign in = {a, b};
 
 logic [31:0] c, c_d;
 wire [31:0] out;
