@@ -1,4 +1,4 @@
-/* Adder that is run through the avalon memory
+/* Run the 2D neural network at once
  */
  
 module runNetworkTop(
@@ -13,19 +13,18 @@ module runNetworkTop(
   input  logic [31:0] avs_s0_writedata // avs_s0.writedata
 );
  
-logic [63:0] a, b, c, d;
-wire [255:0] in; 
+logic [31:0] a, b;
+wire [63:0] in; 
 assign in = {a, b, c, d};
 
-logic [63:0] e, f, e_d, f_d;
-wire [127:0] out;
-assign {e, f} = out;
+logic [31:0] c, c_d;
+wire [31:0] out;
+assign c = out;
 
-runNetwork network (.*);
+runNetwork network (.in (in), .out (out));
 
 always_ff @(posedge clk) begin
-    e_d <= e;
-    f_d <= f;
+    c_d <= c;
 end
 
 // AXI Write Controller
@@ -33,48 +32,26 @@ always_ff @(posedge clk) begin
     if (reset) begin
         a <= 0;
         b <= 0;
-        c <= 0;
-        d <= 0;
     end
     else if (avs_s0_write) begin
         case (avs_s0_address)
             3'd0 : begin
                 a <= avs_s0_writedata;
                 b <= b;
-                c <= c;
-                d <= d;
             end
             3'd1 : begin
                 a <= a;
                 b <= avs_s0_writedata;
-                c <= c;
-                d <= d;
-            end
-            3'd2 : begin
-                a <= a;
-                b <= b;
-                c <= avs_s0_writedata;
-                d <= d;
-            end
-            3'd3 : begin
-                a <= a;
-                b <= b;
-                c <= c;
-                d <= avs_s0_writedata;
             end
             default: begin
                 a <= a;
                 b <= b;
-                c <= c;
-                d <= d;
             end
         endcase
     end
     else begin
         a <= a;
         b <= b;
-        c <= c;
-        d <= d;
     end
 end    
 
@@ -82,8 +59,9 @@ end
 always_comb begin
     if (avs_s0_read) begin
         case (avs_s0_address)
-            3'd4 : avs_s0_readdata = e_d;
-            3'd5 : avs_s0_readdata = f_d;
+            3'd0 : avs_s0_readdata = a;
+            3'd1 : avs_s0_readdata = b;
+            3'd2 : avs_s0_readdata = c_d;
             default: avs_s0_readdata = 0;
         endcase
     end
