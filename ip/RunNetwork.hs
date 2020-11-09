@@ -32,7 +32,8 @@ infixr 8 #>
 --                  Sample network with random values                 --
 ------------------------------------------------------------------------
 
--- Sample layers
+classify :: (Fractional a, Ord a) => a -> a
+classify x = if x > 0 then 1 else -1
 
 layer1 :: (Fractional a, Ord a) => Weights 2 3 a
 layer1 = Weights
@@ -75,20 +76,18 @@ runLayer :: (KnownNat i, KnownNat o, Num a)
          => (Weights i o a)
          -> Vec i a
          -> Vec o a
-runLayer (Weights biases nodes activation) v = map activation $ biases <+> nodes #> v
+runLayer (Weights biases nodes activation) v =
+  map activation $ biases <+> nodes #> v
 
 -- Assumes that the last layer is a pure output layer with no activation
--- function.
+-- function. This is the forward propagation.
 runNet :: (KnownNat i, KnownNat o, Num a, Ord a)
-       => Network i hs o a
-       -> Vec i a
-       -> Vec o a
+       => Network i hs o a -- ^ Dense neural network
+       -> Vec i a -- ^ Input vector
+       -> Vec o a -- ^ Result vector
 runNet (O w) v = runLayer w v
 runNet (w :&~ n) v = runNet n (runLayer w v)
 
-
-classify :: (Fractional a, Ord a) => a -> a
-classify x = if x > 0 then 1 else -1
 
 ------------------------------------------------------------------------
 --                         Generate FPGA Block                        --
