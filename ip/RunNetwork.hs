@@ -33,28 +33,38 @@ infixr 8 #>
 ------------------------------------------------------------------------
 
 -- Sample layers
-ih :: Weights 4 3 (Unsigned 32)
-ih = Weights (1 :> 2 :> 3 :> Nil) (row1 :> row2 :> row3 :> Nil)
-  where
-    row1 = 1 :> 2 :> 3 :> 10 :> Nil
-    row2 = 4 :> 5 :> 6 :> 11 :> Nil
-    row3 = 7 :> 8 :> 9 :> 12 :> Nil
+layer1 :: (Fractional a) => Weights 2 3 a
+layer1 = Weights (-0.00567927 :> 0.80877954 :> 0.95279896 :> Nil)
+  (transpose (
+  (0.95994620 :> 0.7030965 :> 0.75115263 :> Nil) :>
+  (0.96010226 :> 0.6862250 :> 0.77583410 :> Nil) :>
+  Nil))
 
-hh :: Weights  3 3 (Unsigned 32)
-hh = Weights (1 :> 2 :> 3 :> Nil) (row1 :> row2 :> row3 :> Nil)
-  where
-    row1 = 1 :> 2 :> 3 :> Nil
-    row2 = 4 :> 5 :> 6 :> Nil
-    row3 = 7 :> 8 :> 9 :> Nil
+layer2 :: (Fractional a) => Weights  3 3 a
+layer2 = Weights (0.6884502 :> 0.9990541 :> -0.68232316 :> Nil)
+  (transpose (
+  (-0.15383774 :>  0.62124210 :> 1.1827494 :> Nil) :>
+  ( 1.31086090 :> -0.15906326 :> 0.4299545 :> Nil) :>
+  ( 1.56196120 :>  0.20728876 :> 0.3584617 :> Nil) :>
+  Nil))
 
-ho :: Weights  3 2 (Unsigned 32)
-ho = Weights (1 :> 2 :> Nil) (row1 :> row2 :> Nil)
-  where
-    row1 = 1 :> 2 :> 3 :> Nil
-    row2 = 4 :> 5 :> 6 :> Nil
+layer3 :: (Fractional a) => Weights  3 2 a
+layer3 = Weights (0.428222 :> 0.59423786 :> Nil)
+  (transpose (
+  (-0.30720720 :> -0.26148600 :> Nil) :>
+  ( 0.49485013 :>  0.20622185 :> Nil) :>
+  ( 0.70307830 :> -0.27332035 :> Nil) :>
+  Nil))
 
-exNetwork = ih :&~ hh :&~ O ho :: Network 4 '[3, 3] 2 (Unsigned 32)
+outputLayer :: (Fractional a) => Weights 2 1 a
+outputLayer = Weights (-0.99977857 :> Nil)
+  (transpose (
+  (1.1125442 :> Nil) :>
+  (1.9488618 :> Nil) :>
+  Nil))
 
+exNetwork :: (Fractional a) => Network 2 '[3, 3, 2] 1 a
+exNetwork = layer1 :&~ layer2 :&~ layer3 :&~ O outputLayer 
 
 ------------------------------------------------------------------------
 --                          Running a network                         --
@@ -63,12 +73,14 @@ exNetwork = ih :&~ hh :&~ O ho :: Network 4 '[3, 3] 2 (Unsigned 32)
 runLayer :: (KnownNat i, KnownNat o, Num a) => (Weights i o a) -> Vec i a -> Vec o a
 runLayer (Weights biases nodes) v = biases <+> nodes #> v
 
+-- Assumes that the last layer is a pure output layer with no activation
+-- function.
 runNet :: (KnownNat i, KnownNat o, Num a, Ord a)
        => (a -> a)
        -> Network i hs o a
        -> Vec i a
        -> Vec o a
-runNet activation (O w) v = map activation (runLayer w v)
+runNet activation (O w) v = runLayer w v
 runNet activation (w :&~ n) v = runNet activation n (map activation (runLayer w v))
 
 
@@ -83,6 +95,6 @@ runNet activation (w :&~ n) v = runNet activation n (map activation (runLayer w 
                  ]
     , t_output = PortName "out"
     }) #-}
-topEntity :: Vec 4 (Unsigned 32) -> Vec 2 (Unsigned 32)
+topEntity :: Vec 2 (SFixed 7 25) -> Vec 1 (SFixed 7 25)
 topEntity = runNet reLU exNetwork
 {-# NOINLINE topEntity #-}

@@ -17,5 +17,8 @@ data Weights (m :: Nat) (n :: Nat) a =
 
 data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
     O :: (Weights i o a) -> Network i '[] o a
-    (:&~) :: (KnownNat i, KnownNat o, KnownNat h) => (Weights i h a) -> (Network h hs o a) -> Network i (h ': hs) o a
+    (:&~) :: (KnownNat i, KnownNat o, KnownNat h)
+          => (Weights i h a)
+          -> (Network h hs o a)
+          -> Network i (h ': hs) o a
 infixr 5 :&~
