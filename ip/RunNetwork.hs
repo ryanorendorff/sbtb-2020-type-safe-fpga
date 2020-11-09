@@ -33,38 +33,39 @@ infixr 8 #>
 ------------------------------------------------------------------------
 
 -- Sample layers
-layer1 :: (Fractional a) => Weights 2 3 a
-layer1 = Weights (-0.00567927 :> 0.80877954 :> 0.95279896 :> Nil)
-  (transpose (
-  (0.95994620 :> 0.7030965 :> 0.75115263 :> Nil) :>
-  (0.96010226 :> 0.6862250 :> 0.77583410 :> Nil) :>
-  Nil))
 
-layer2 :: (Fractional a) => Weights  3 3 a
-layer2 = Weights (0.6884502 :> 0.9990541 :> -0.68232316 :> Nil)
-  (transpose (
-  (-0.15383774 :>  0.62124210 :> 1.1827494 :> Nil) :>
-  ( 1.31086090 :> -0.15906326 :> 0.4299545 :> Nil) :>
-  ( 1.56196120 :>  0.20728876 :> 0.3584617 :> Nil) :>
-  Nil))
+layer1 :: (Fractional a, Ord a) => Weights 2 3 a
+layer1 = Weights
+  (0.59075195 :> 0.7959526 :> 0.38218504 :> Nil)
+  ((-0.7289600 :>  1.26979710 :> Nil) :>
+   ( 1.1520898 :> -0.32037434 :> Nil) :>
+   ( 0.9137672 :>  1.06754260 :> Nil) :> Nil)
+  reLU
 
-layer3 :: (Fractional a) => Weights  3 2 a
-layer3 = Weights (0.428222 :> 0.59423786 :> Nil)
-  (transpose (
-  (-0.30720720 :> -0.26148600 :> Nil) :>
-  ( 0.49485013 :>  0.20622185 :> Nil) :>
-  ( 0.70307830 :> -0.27332035 :> Nil) :>
-  Nil))
+layer2 :: (Fractional a, Ord a) => Weights 3 3 a
+layer2 = Weights
+  (0.028665015 :> 0.3068945 :> -0.09725595 :> Nil)
+  ((-0.67000060 :>  0.87169980 :> -0.34371296 :> Nil) :>
+   ( 0.95989394 :> -0.18818283 :> -0.39938320 :> Nil) :>
+   ( 1.03449580 :> -0.14215301 :> -0.29492024 :> Nil) :> Nil)
+  reLU
 
-outputLayer :: (Fractional a) => Weights 2 1 a
-outputLayer = Weights (-0.99977857 :> Nil)
-  (transpose (
-  (1.1125442 :> Nil) :>
-  (1.9488618 :> Nil) :>
-  Nil))
+layer3 :: (Fractional a, Ord a) => Weights 3 2 a
+layer3 = Weights
+  (0.4435449 :> -0.09169075 :> Nil)
+  ((-0.23531327 :> 0.21636824 :> -0.24308626 :> Nil) :>
+   ( 1.82368970 :> 0.99214333 :>  0.63132364 :> Nil) :> Nil)
+  reLU
 
-exNetwork :: (Fractional a) => Network 2 '[3, 3, 2] 1 a
-exNetwork = layer1 :&~ layer2 :&~ layer3 :&~ O outputLayer 
+layer4 :: (Fractional a, Ord a) => Weights 2 1 a
+layer4 = Weights
+  (0.77317786 :> Nil)
+  ((0.70241016 :> -0.5099548 :> Nil) :> Nil)
+  id
+
+exNetwork :: (Fractional a, Ord a) => Network 2 '[3, 3, 2] 1 a
+exNetwork = layer1 :&~ layer2 :&~ layer3 :&~ O layer4
+
 
 ------------------------------------------------------------------------
 --                          Running a network                         --
