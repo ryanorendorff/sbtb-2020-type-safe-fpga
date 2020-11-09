@@ -87,6 +87,9 @@ runNet (O w) v = runLayer w v
 runNet (w :&~ n) v = runNet n (runLayer w v)
 
 
+classify :: (Fractional a, Ord a) => a -> a
+classify x = if x > 0 then 1 else -1
+
 ------------------------------------------------------------------------
 --                         Generate FPGA Block                        --
 ------------------------------------------------------------------------
@@ -99,5 +102,5 @@ runNet (w :&~ n) v = runNet n (runLayer w v)
     , t_output = PortName "out"
     }) #-}
 topEntity :: Vec 2 (SFixed 7 25) -> Vec 1 (SFixed 7 25)
-topEntity = runNet exNetwork
+topEntity = map classify . runNet exNetwork . map classify
 {-# NOINLINE topEntity #-}
