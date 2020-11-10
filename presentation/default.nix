@@ -36,6 +36,7 @@ in pkgs.stdenv.mkDerivation {
     pandoc sbtb-2020-type-safe-fpga.md \
            -o $out/SBTB-2020-Type-Safe-FPGA.pdf \
            -t beamer \
+	   -f markdown+implicit_figures \
            --slide-level=2 \
            --pdf-engine=xelatex
   '';

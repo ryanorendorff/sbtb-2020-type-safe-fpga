@@ -21,7 +21,7 @@ infixr 8 <.>
 (<.>) = dotProduct
 
 matrixVector :: (KnownNat m, KnownNat n, Num a) => Matrix m n a -> Vec n a -> Vec m a
-matrixVector m v = map (`dotProduct` v) m
+matrixVector m v = map (<.> v) m
 
 infixr 8 #>
 (#>) :: (KnownNat m, KnownNat n, Num a) => Matrix m n a -> Vec n a -> Vec m a
@@ -65,7 +65,10 @@ layer4 = Weights
   id
 
 exNetwork :: (Fractional a, Ord a) => Network 2 '[3, 3, 2] 1 a
-exNetwork = layer1 :&~ layer2 :&~ layer3 :&~ O layer4
+exNetwork = layer1 :>>
+            layer2 :>>
+            layer3 :>>
+            OutputLayer layer4
 
 
 ------------------------------------------------------------------------
@@ -85,8 +88,8 @@ runNet :: (KnownNat i, KnownNat o, Num a, Ord a)
        => Network i hs o a -- ^ Dense neural network
        -> Vec i a -- ^ Input vector
        -> Vec o a -- ^ Result vector
-runNet (O w) v = runLayer w v
-runNet (w :&~ n) v = runNet n (runLayer w v)
+runNet (OutputLayer w) v = runLayer w v
+runNet (w :>> n) v = runNet n (runLayer w v)
 
 
 ------------------------------------------------------------------------
