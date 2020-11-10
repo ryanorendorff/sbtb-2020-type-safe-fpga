@@ -1,7 +1,8 @@
 ---
 title: Programming ML algorithms in hardware, sanely 
-subtitle: using Haskell and Rust!
-author: Daniel Hensley and Ryan Orendorff
+subtitle: using Haskell and Rust! 
+author: |
+  Daniel Hensley and Ryan Orendorff (https://git.io/JkTzb)
 date: November 13th, 2020
 theme: metropolis
 header-includes: |
@@ -16,12 +17,13 @@ header-includes: |
   \setmonofont{Iosevka}
   \usefonttheme[onlymath]{serif}
 
-  \usepackage{epsdice}
-  \newcommand\vcdice[1]{\vcenter{\hbox{\epsdice{#1}}}}
-
   \newcommand{\undovspacepause}{\vspace*{-0.9em}}
 ---
 
+<!--
+TODO: Figure out how to add newline with the presentation URL in the author
+      section.
+-->
 
 Goal of the talk: run away quickly
 ----------------------------------
