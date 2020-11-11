@@ -17,11 +17,11 @@ fn run() -> FpgaApiResult<()> {
     let mut sesh = take_fpga_session();
 
     // Define the resources.
-    let input_point_regs = Resource::<(I7F25, I7F25), ReadWrite>::new(
+    let input_point = Resource::<(I7F25, I7F25), ReadWrite>::new(
         "Input Point Registers(X, Y)",
         POINT_NN_INPUT_VECTOR_OFFSET,
     );
-    let out_class_reg = Resource::<I7F25, ReadOnly>::new(
+    let output_class = Resource::<I7F25, ReadOnly>::new(
         "Output Classification Register",
         POINT_NN_OUTPUT_CLASS_OFFSET,
     );
@@ -46,26 +46,26 @@ fn run() -> FpgaApiResult<()> {
     println!("++++++++++\n");
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        zero, zero, zero_hex_literal, zero_hex_literal, &input_point_regs
+        zero, zero, zero_hex_literal, zero_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (zero, zero))?;
+    sesh.write(&input_point, (zero, zero))?;
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        pos_x, pos_y, pos_x_hex_literal, pos_y_hex_literal, &input_point_regs
+        pos_x, pos_y, pos_x_hex_literal, pos_y_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (pos_x, pos_y))?;
-    let (px, py) = sesh.readw(&input_point_regs)?;
+    sesh.write(&input_point, (pos_x, pos_y))?;
+    let (px, py) = sesh.readw(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,
         py,
         fx_to_u32(px),
         fx_to_u32(py),
-        &input_point_regs
+        &input_point
     );
-    println!("\nReading result from {}", &out_class_reg);
+    println!("\nReading result from {}", &output_class);
     println!("==============\n");
-    let q1_actual = sesh.read(&out_class_reg)?;
+    let q1_actual = sesh.read(&output_class)?;
     let q1_expected = I7F25::from_num(1.0);
     println!(
         "Actual output:   {} hex {:#X}",
@@ -83,26 +83,26 @@ fn run() -> FpgaApiResult<()> {
     println!("++++++++++\n");
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        zero, zero, zero_hex_literal, zero_hex_literal, &input_point_regs
+        zero, zero, zero_hex_literal, zero_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (zero, zero))?;
+    sesh.write(&input_point, (zero, zero))?;
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        neg_x, pos_y, neg_x_hex_literal, pos_y_hex_literal, &input_point_regs
+        neg_x, pos_y, neg_x_hex_literal, pos_y_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (neg_x, pos_y))?;
-    let (px, py) = sesh.readw(&input_point_regs)?;
+    sesh.write(&input_point, (neg_x, pos_y))?;
+    let (px, py) = sesh.readw(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,
         py,
         fx_to_u32(px),
         fx_to_u32(py),
-        &input_point_regs
+        &input_point
     );
-    println!("\nReading result from {}", &out_class_reg);
+    println!("\nReading result from {}", &output_class);
     println!("==============\n");
-    let q2_actual = sesh.read(&out_class_reg)?;
+    let q2_actual = sesh.read(&output_class)?;
     let q2_expected = I7F25::from_num(-1.0);
     println!(
         "Actual output:   {} hex {:#X}",
@@ -120,26 +120,26 @@ fn run() -> FpgaApiResult<()> {
     println!("++++++++++\n");
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        zero, zero, zero_hex_literal, zero_hex_literal, &input_point_regs
+        zero, zero, zero_hex_literal, zero_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (zero, zero))?;
+    sesh.write(&input_point, (zero, zero))?;
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        neg_x, neg_y, neg_x_hex_literal, neg_y_hex_literal, &input_point_regs
+        neg_x, neg_y, neg_x_hex_literal, neg_y_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (neg_x, neg_y))?;
-    let (px, py) = sesh.readw(&input_point_regs)?;
+    sesh.write(&input_point, (neg_x, neg_y))?;
+    let (px, py) = sesh.readw(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,
         py,
         fx_to_u32(px),
         fx_to_u32(py),
-        &input_point_regs
+        &input_point
     );
-    println!("\nReading result from {}", &out_class_reg);
+    println!("\nReading result from {}", &output_class);
     println!("==============\n");
-    let q3_actual = sesh.read(&out_class_reg)?;
+    let q3_actual = sesh.read(&output_class)?;
     let q3_expected = q1_expected;
     println!(
         "Actual output:   {} hex {:#X}",
@@ -157,26 +157,26 @@ fn run() -> FpgaApiResult<()> {
     println!("++++++++++\n");
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        zero, zero, zero_hex_literal, zero_hex_literal, &input_point_regs
+        zero, zero, zero_hex_literal, zero_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (zero, zero))?;
+    sesh.write(&input_point, (zero, zero))?;
     println!(
         "Writing ({}, {}) hex ({:#X}, {:#X}) to {}",
-        pos_x, neg_y, pos_x_hex_literal, neg_y_hex_literal, &input_point_regs
+        pos_x, neg_y, pos_x_hex_literal, neg_y_hex_literal, &input_point
     );
-    sesh.write(&input_point_regs, (pos_x, neg_y))?;
-    let (px, py) = sesh.readw(&input_point_regs)?;
+    sesh.write(&input_point, (pos_x, neg_y))?;
+    let (px, py) = sesh.readw(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,
         py,
         fx_to_u32(px),
         fx_to_u32(py),
-        &input_point_regs
+        &input_point
     );
-    println!("\nReading result from {}", &out_class_reg);
+    println!("\nReading result from {}", &output_class);
     println!("==============\n");
-    let q4_actual = sesh.read(&out_class_reg)?;
+    let q4_actual = sesh.read(&output_class)?;
     let q4_expected = q2_expected;
     println!(
         "Actual output:   {} hex {:#X}",

@@ -303,15 +303,271 @@ Blah blah
 Rust program to interact with the FPGA
 ======================================
 
-Example slide
--------------
+The Big Picture -- Safe Control of our FPGA Hardware
+----------------------------------------------------
 
-Example Rust code.
+![](./fig/high_level_host_and_fpga.pdf)
+
+Key Concepts
+------------
+
+We will build software that abstracts over the FPGA from the host's perspective. We will shoot for all of the following using the Rust type system:
+
+- Encode and enforce HW invariants.
+- Push as much as possible to compile-time checks.
+- Maintain ergonomics!
+
+Key Concepts
+------------
+
+In the end, we want something that looks like this:
 
 ```rust
-fn hello() {
-  println!("Hello World!");
+// Write our 2D point to the FPGA for the computation.
+sesh.write(&input_point, (x, y))?;
+// Read back the classification from the net.
+let quad_class = sesh.read(&output_class)?;
+```
+
+and has compile-time guarantees so we can sleep well at night!
+
+How Do We Get There?
+--------------------
+
+We will build a *Session* API using Rust:
+
+![](./fig/type_system_components.pdf)
+
+The Design
+----------
+
+The major components of our Session API:
+
+1. Expressing application-specific resources (*e.g.*, registers).
+2. The session that wraps the FPGA and all interaction with it.
+3. Linking these together in a way that is ergonomic and safe.
+
+ADD FIG
+
+Generically Modeling FPGA Resources with Traits
+-----------------------------------------------
+
+Traits are one of the anchors of the Rust type system. They allow you to define
+shared behavior and constraints for sets of types.
+
+They are similar to typeclasses in Haskell and interfaces in Java.
+
+Encoding the Data Type/Primitive with a Trait
+---------------------------------------------
+
+```rust
+/// Trait for FPGA data types.
+pub trait Data: Copy + Clone {
+    fn from_le_bytes(bytes: &[u8]) -> FpgaApiResult<Self>;
+    fn from_be_bytes(bytes: &[u8]) -> FpgaApiResult<Self>;
+    fn to_le_bytes(self) -> Vec<u8>;
+    fn to_be_bytes(self) -> Vec<u8>;
 }
+```
+
+If anyone implements `Data` for any `Copy` type in Rust (including custom types),
+then they can plug it into our session API.
+
+Controlling Read/Write with a Typestate
+---------------------------------------
+
+Typestates are a great way to encode invariants in the type system. There is no
+runtime cost and if it compiles, the encoded invariants are guaranteed.
+
+![](./fig/typestate_depictions.pdf)
+
+*Note*: The common `Builder` pattern in Rust is a form of the latter.
+
+Encoding Resource Allowed I/O with Typestates in Rust
+-----------------------------------------------------
+
+```Rust
+/// Typestate pattern via empty marker trait.
+pub trait IOState {}
+/// Uninhabitable `enum` for first typestate.
+pub enum ReadOnly {}
+impl IOState for ReadOnly {}
+/// Uninhabitable `enum` for second typestate.
+pub enum ReadWrite {}
+impl IOState for ReadWrite {}
+```
+
+Putting These Together: Expressing Any FPGA Resource
+-----------------------------------------------------
+
+```rust
+pub struct Resource<D: Data, I: IOState> {
+    name: &'static str,
+    offset: usize,
+    _ty: PhantomData<D>,
+    _st: PhantomData<I>,
+}
+```
+
+For any resource, the only thing reified in memory at runtime is a `name` and
+(byte) `offset`. The `D` and `I` typestates determine the available operations
+associated with the FPGA (through the `Session`).
+
+What Does This Give Us?
+-----------------------
+
+In application code:
+
+1. (In a type sense) we can't send the wrong bytes to the FPGA or interpret incoming bytes incorrectly.
+2. We can't mutate a read-only FPGA resource.
+
+```Rust
+let sesh = take_fpga_session();
+let input_point = Resource::<(u32, u32), ReadWrite>::new(...);
+let output_class = Resource::<u32, ReadOnly>::new(...);
+// -- snip --
+sesh.write(&input_point, (1.3, -2.7))?; // Comp fail (write wrong type).
+let v: f32 = sesh.read(&output_class)?; // Comp fail (read wrong type).
+sesh.write(&output_class, 1u32)?;       // Comp fail (write read-only).
+```
+
+Now, to the `Session` Type
+--------------------------
+
+The opaque `Session` type represents the FPGA and our interaction with it.
+
+We will encode the singular nature of the HW and the importance of maintaining appropriate
+state with the help of the type system.
+
+Encode `Session` HW Invariant: Singleton
+----------------------------------------
+
+We can't let our devs arbitrarily spawn up or duplicate sessions (there's only
+1 piece of HW). We use Rust's version of the singleton pattern for this:
+
+```rust
+struct Fpga(Option<MmapSesh>);
+impl Fpga {
+    fn take(&mut self) -> MmapSesh {
+        let sesh = self.0.take();
+        sesh.expect("Forbidden to create more than one FPGA session!")
+    }
+}
+pub fn take_fpga_session() -> MmapSesh {
+    POINT_NN_FPGA.lock().unwrap().take()
+}
+// -- snip -- in application code
+let mut sesh = take_fpga_session();
+```
+
+Encode `Session` HW Invariant: Initialization and Finalization
+--------------------------------------------------------------
+
+Rust's RAII and affine type system allows us to ensure FPGA/HW state invariants:
+
+- Can only create a `Session` through constructor that performs proper initialization.
+- Must implement `Drop` to finalize state of the FPGA (and any associated HW) when we're done.
+- You cannot then forget to `Drop` -- in happy or sad code paths!
+
+Encode `Session` HW Invariant: Initialization
+---------------------------------------------
+
+```rust
+impl MmapSession {
+    // The only way to get an instance of our `Session` type.
+    pub fn new(mmap: MmapMut) -> FpgaApiResult<Self> {
+        let mut sesh = Self { mmap };
+        sesh.initialize()?; // HW initialization here.
+        Ok(sesh)
+    }
+}
+```
+
+Encode `Session` HW Invariant: Finalization
+-------------------------------------------
+
+```rust
+pub trait Session: Drop { // Note **must** implement `Drop`.
+// -- snip --
+impl Drop for MmapSesh {
+    fn drop(&mut self) {
+        // Enforce critical FPGA/HW invariants for "final" state.
+        // -- snip --
+    }
+}
+```
+
+What Does This Give Us?
+-----------------------
+
+With `Drop` implemented, we cannot "forget" to cleanup the FPGA and associated resources:
+
+```Rust
+fn main() {
+    let sesh = take_fpga_session();
+    // -- snip -- do stuff with the FPGA.
+    risky_function.expect("Uh oh, hit a panic!");
+    // -- snip -- more stuff
+    println!("Done!");
+}
+```
+
+Whether we `panic` or not, our session will be `Drop`ped.
+
+Bringing It All Together: The `Session` Trait
+---------------------------------------------
+
+```rust
+pub trait Session: Drop {
+    fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
+    where
+        D: Data,
+        R: ReadOnlyResource<Value = D>;
+    fn readw<D, R>(&self, resource: &R) -> FpgaApiResult<D>
+    where
+        D: Data,
+        R: ReadWriteResource<Value = D>;
+    fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
+    where
+        D: Data,
+        R: ReadWriteResource<Value = D>;
+}
+```
+
+Implementing `Session` for Memory-Mapped FPGA I/O
+-------------------------------------------------
+
+```rust
+impl Session for MmapSesh {
+    fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
+    where
+        D: Data,
+        R: ReadOnlyResource<Value = D>,
+    {
+        let start = resource.byte_offset();
+        let stop = start + resource.size_in_bytes();
+        let slc = &self.mmap[start..stop];
+        D::from_le_bytes(slc)
+    }
+    // -- snip --
+```
+
+Implementing `Session` for Memory-Mapped FPGA I/O
+-------------------------------------------------
+```rust
+    // -- snip --
+    fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
+    where
+        D: Data,
+        R: ReadWriteResource<Value = D>,
+    {
+        let start = resource.byte_offset();
+        let stop = start + resource.size_in_bytes();
+        self.mmap[start..stop].copy_from_slice(
+            val.to_le_bytes().as_slice()
+        );
+        Ok(())
+    }
 ```
 
 Conclusion

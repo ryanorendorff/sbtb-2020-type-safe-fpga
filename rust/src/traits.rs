@@ -40,17 +40,17 @@ pub trait ReadWriteResource {
 /// Trait to wrap FPGA hardware with "session" API.
 pub trait Session: Drop {
     /// Read a read-only resource.
-    fn read<D, R>(&self, reg: &R) -> FpgaApiResult<D>
+    fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
     where
         D: Data,
         R: ReadOnlyResource<Value = D>;
     /// Read a read/write resource.
-    fn readw<D, R>(&self, reg: &R) -> FpgaApiResult<D>
+    fn readw<D, R>(&self, resource: &R) -> FpgaApiResult<D>
     where
         D: Data,
         R: ReadWriteResource<Value = D>;
     /// Write to a read/write resource.
-    fn write<D, R>(&mut self, reg: &R, val: D) -> FpgaApiResult<()>
+    fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
     where
         D: Data,
         R: ReadWriteResource<Value = D>;
