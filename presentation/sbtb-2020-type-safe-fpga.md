@@ -309,7 +309,15 @@ Blah blah
 - Simple to test the base functions (just Haskell! Can use quickcheck)
 - State machines are modeled in a convenient form using Mealy machines. Enabled
   pipelining.
-- 
+- Something else here, ssshhhh it is super secret.
+
+
+NN actually on the chip
+-----------------------
+
+Neural network we actually have on the chip!
+
+![](./fig/nn-output.pdf)
 
 
 Rust program to interact with the FPGA
