@@ -571,6 +571,9 @@ impl<D: Data> Writable for Resource<D, ReadWrite> { // ...
 Bringing It All Together: The `Session` Trait
 ---------------------------------------------
 
+:::::::::::::: {.columns}
+::: {.column width="49%"}
+
 ```rust
 pub trait Session: Drop {
 
@@ -586,6 +589,17 @@ pub trait Session: Drop {
     ) -> FpgaApiResult<()>
 }
 ```
+
+:::
+::: {.column width="49%"}
+
+- We have a simple and ergonomic API with just `read` and `write` but have wired
+up traits, constraints, and typestates so that a lot is enforced at compile-time.
+- The Rust compiler will *monomorphize* concrete `read` and `write` functions
+based on what resources are defined and used in a given application.
+
+:::
+::::::::::::::
 
 Implementing `Session` for Memory-Mapped File I/O
 -------------------------------------------------
