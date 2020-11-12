@@ -325,10 +325,12 @@ Key Concepts
 In the end, we want something that looks like this:
 
 ```rust
+// Get our FPGA session.
+let sesh = take_fpga_session();
 // Write our 2D point to the FPGA for the computation.
 sesh.write(&input_point, (x, y))?;
 // Read back the classification from the net.
-let quad_class = sesh.read(&output_class)?;
+let quad_classification = sesh.read(&output_class)?;
 ```
 
 and has compile-time guarantees so we can sleep well at night!
@@ -345,14 +347,14 @@ The Design
 
 The major components of our Session API:
 
-1. Expressing application-specific resources (*e.g.*, registers).
+1. Express application-specific resources (*e.g.*, registers).
 2. The session that wraps the FPGA and all interaction with it.
-3. Linking these together in a way that is ergonomic and type safe.
+3. Link these together in a way that is ergonomic and type safe.
 
 ![](./fig/session_api.pdf){ width=300 }
 
-Generically Modeling FPGA Resources with Traits
------------------------------------------------
+Generically Modeling FPGA Resources with Traits and Typestates
+--------------------------------------------------------------
 
 Traits are one of the anchors of the Rust type system. They allow you to define
 shared behavior and constraints for sets of types.
@@ -365,7 +367,7 @@ Encoding the Data Type/Primitive with a Trait
 
 ```rust
 /// Trait for FPGA data types.
-pub trait Data: Copy + Clone {
+pub trait Data: Sized {
     fn from_le_bytes(bytes: &[u8]) -> FpgaApiResult<Self>;
     fn from_be_bytes(bytes: &[u8]) -> FpgaApiResult<Self>;
     fn to_le_bytes(self) -> Vec<u8>;
@@ -373,8 +375,8 @@ pub trait Data: Copy + Clone {
 }
 ```
 
-If anyone implements `Data` for any `Copy` type in Rust (including custom types),
-then they can plug it into our session API.
+`Data` is implemented for primitives (*e.g.*, `u32`, `f32`, etc.). To plug into
+the `Session` API with a custom data type, just implement `Data`!
 
 Controlling Read/Write with a Typestate
 ---------------------------------------
@@ -605,6 +607,7 @@ Point Quadrant Classifier: The Code
     sesh.write(&input_point, (pos_x, pos_y))?;
     let q1_actual = sesh.read(&output_class)?;
     let q1_expected = I7F25::from_num(1.0);
+    // -- snip --
     // Quadrant 2.
     sesh.write(&input_point, (neg_x, pos_y))?;
     let q2_actual = sesh.read(&output_class)?;

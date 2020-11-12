@@ -3,7 +3,7 @@
 use crate::FpgaApiResult;
 
 /// Trait for FPGA data types.
-pub trait Data: Copy + Clone {
+pub trait Data: Sized {
     /// From little-endian byte slice.
     fn from_le_bytes(bytes: &[u8]) -> FpgaApiResult<Self>;
     /// From big-endian byte slice.

@@ -27,15 +27,11 @@ fn run() -> FpgaApiResult<()> {
     );
 
     // Locations (Fixed point 7/25 values).
-    let pos_x = I7F25::from_num(1.5);
-    let neg_x = I7F25::from_num(-1.5);
-    let pos_y = I7F25::from_num(2.5);
-    let neg_y = I7F25::from_num(-2.5);
+    let (pos_x, neg_x) = (I7F25::from_num(1.5), I7F25::from_num(-1.5));
+    let (pos_y, neg_y) = (I7F25::from_num(2.5), I7F25::from_num(-2.5));
 
-    let pos_x_hex_literal = fx_to_u32(pos_x);
-    let neg_x_hex_literal = fx_to_u32(neg_x);
-    let pos_y_hex_literal = fx_to_u32(pos_y);
-    let neg_y_hex_literal = fx_to_u32(neg_y);
+    let (pos_x_hex_literal, neg_x_hex_literal) = (fx_to_u32(pos_x), fx_to_u32(neg_x));
+    let (pos_y_hex_literal, neg_y_hex_literal) = (fx_to_u32(pos_y), fx_to_u32(neg_y));
 
     let zero = I7F25::from_num(0);
     let zero_hex_literal = fx_to_u32(zero);
