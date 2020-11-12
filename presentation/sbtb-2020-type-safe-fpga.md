@@ -44,6 +44,11 @@ has both an ARM processor and FPGA on one chip (SoC).
 ![](./fig/chip.pdf)
 
 
+- Low power
+- Very high throughput (GPU+ level)
+- Deterministic timing
+
+
 How is a neural network implemented?
 ------------------------------------
 
@@ -172,6 +177,7 @@ data LayerTransition (m :: Nat) (n :: Nat) a =
           }
 ```
 
+
 We can compose layers using a dependently typed list
 ----------------------------------------------------
 
@@ -256,7 +262,7 @@ We can now synthesize what we have into something the FPGA can understand using
 
 ```haskell
 topEntity :: Vec 2 (SFixed 7 25) -> Vec 1 (SFixed 7 25)
-topEntity = runNet exNetwork
+topEntity = runNet network
 ```
 
 . . .
@@ -315,9 +321,11 @@ Blah blah
 NN actually on the chip
 -----------------------
 
-Neural network we actually have on the chip!
+Neural network we actually have on the chip! It runs the whole network _in one
+clock cycle_ at 50 MHz (20 ns!)
 
-![](./fig/nn-output.pdf)
+
+![](./fig/nn-model.pdf)
 
 
 Rust program to interact with the FPGA
@@ -598,6 +606,8 @@ Implementing `Session` for Memory-Mapped FPGA I/O
 
 Point Quadrant Classifier: The Problem
 --------------------------------------
+
+![](./fig/nn-output.pdf)
 
 Point Quadrant Classifier: The Code
 -----------------------------------
