@@ -525,6 +525,7 @@ Bringing It All Together: The `Session` Trait
 
 ```rust
 pub trait Session: Drop {
+  
     fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
     where D: Data,
           R: ReadOnlyResource<Value = D>;
