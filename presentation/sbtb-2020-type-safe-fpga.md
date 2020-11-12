@@ -313,7 +313,7 @@ A common paradigm to interact with an FPGA is via a host CPU.
 Key Concepts
 ------------
 
-We will build software that abstracts over the FPGA from the host CPU's perspective. We will shoot for all of the following using the Rust type system:
+We will build a Rust API and shoot for the following using the type system:
 
 - Encode and enforce HW invariants.
 - Push as much as possible to compile-time checks.
@@ -510,7 +510,7 @@ With `Drop` implemented, we cannot "forget" to cleanup the FPGA and associated r
 fn main() {
     let sesh = take_fpga_session();
     // -- snip -- do stuff with the FPGA.
-    risky_function.expect("Uh oh, hit a panic!");
+    risky_function().expect("Uh oh, hit a panic!");
     // -- snip -- more stuff
     println!("Done!");
 }
