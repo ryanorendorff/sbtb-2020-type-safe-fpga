@@ -624,8 +624,8 @@ Implementing `Session` for Memory-Mapped FPGA I/O
     }
 ```
 
-Point Quadrant Classifier: The Problem
---------------------------------------
+Point Quadrant Classifier: Visualization of Solution
+----------------------------------------------------
 
 ![](./fig/nn-output.pdf)
 
