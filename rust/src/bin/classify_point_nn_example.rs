@@ -50,7 +50,7 @@ fn run() -> FpgaApiResult<()> {
         pos_x, pos_y, pos_x_hex_literal, pos_y_hex_literal, &input_point
     );
     sesh.write(&input_point, (pos_x, pos_y))?;
-    let (px, py) = sesh.readw(&input_point)?;
+    let (px, py) = sesh.read(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,
@@ -87,7 +87,7 @@ fn run() -> FpgaApiResult<()> {
         neg_x, pos_y, neg_x_hex_literal, pos_y_hex_literal, &input_point
     );
     sesh.write(&input_point, (neg_x, pos_y))?;
-    let (px, py) = sesh.readw(&input_point)?;
+    let (px, py) = sesh.read(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,
@@ -124,7 +124,7 @@ fn run() -> FpgaApiResult<()> {
         neg_x, neg_y, neg_x_hex_literal, neg_y_hex_literal, &input_point
     );
     sesh.write(&input_point, (neg_x, neg_y))?;
-    let (px, py) = sesh.readw(&input_point)?;
+    let (px, py) = sesh.read(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,
@@ -161,7 +161,7 @@ fn run() -> FpgaApiResult<()> {
         pos_x, neg_y, pos_x_hex_literal, neg_y_hex_literal, &input_point
     );
     sesh.write(&input_point, (pos_x, neg_y))?;
-    let (px, py) = sesh.readw(&input_point)?;
+    let (px, py) = sesh.read(&input_point)?;
     println!(
         "Read ({}, {}) hex ({:#X}, {:#X}) from {}",
         px,

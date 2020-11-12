@@ -1,6 +1,6 @@
 //! Implementation of FPGA Session API (here for memory-mapped file API).
 
-use crate::traits::{Data, ReadOnlyResource, ReadWriteResource, Session};
+use crate::traits::{Data, Readable, Session, Writable};
 use crate::FpgaApiResult;
 
 use memmap::MmapMut;
@@ -22,31 +22,13 @@ impl MmapSesh {
     }
 }
 impl Session for MmapSesh {
-    fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where
-        D: Data,
-        R: ReadOnlyResource<Value = D>,
-    {
+    fn read<R: Readable>(&self, resource: &R) -> FpgaApiResult<R::Value> {
         let start = resource.byte_offset();
         let stop = start + resource.size_in_bytes();
         let slc = &self.mmap[start..stop];
-        D::from_le_bytes(slc)
+        R::Value::from_le_bytes(slc)
     }
-    fn readw<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where
-        D: Data,
-        R: ReadWriteResource<Value = D>,
-    {
-        let start = resource.byte_offset();
-        let stop = start + resource.size_in_bytes();
-        let slc = &self.mmap[start..stop];
-        D::from_le_bytes(slc)
-    }
-    fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
-    where
-        D: Data,
-        R: ReadWriteResource<Value = D>,
-    {
+    fn write<R: Writable>(&mut self, resource: &R, val: R::Value) -> FpgaApiResult<()> {
         let start = resource.byte_offset();
         let stop = start + resource.size_in_bytes();
         self.mmap[start..stop].copy_from_slice(val.to_le_bytes().as_slice());

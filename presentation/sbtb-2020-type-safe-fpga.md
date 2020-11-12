@@ -336,7 +336,8 @@ The Big Picture -- Safe Control of Our FPGA Hardware
 
 ![](./fig/high_level_host_and_fpga.pdf)
 
-A common paradigm to interact with an FPGA is via a host CPU.
+A common paradigm to interact with an FPGA is via a host CPU. We will build a
+user-facing `Session` API built on top of memory-mapped file I/O with the FPGA.
 
 Key Concepts
 ------------
@@ -379,7 +380,7 @@ The major components of our Session API:
 2. The session that wraps the FPGA and all interaction with it.
 3. Link these together in a way that is ergonomic and type safe.
 
-![](./fig/session_api.pdf){ width=300 }
+![](./fig/session_api.pdf){ width=320 }
 
 Generically Modeling FPGA Resources with Traits and Typestates
 --------------------------------------------------------------
@@ -548,40 +549,58 @@ fn main() {
 
 Whether we `panic` or not, our session will be `Drop`ped.
 
+Bringing It All Together in the Session: Helper Traits
+------------------------------------------------------
+
+```rust
+pub trait Readable {
+    type Value: Data;
+    fn byte_offset(&self) -> usize;
+    fn size_in_bytes(&self) -> usize;
+}
+pub trait Writable {
+    type Value: Data;
+    fn byte_offset(&self) -> usize;
+    fn size_in_bytes(&self) -> usize;
+}
+impl<D: Data> Readable for Resource<D, ReadOnly> {  // ...
+impl<D: Data> Readable for Resource<D, ReadWrite> { // ...
+impl<D: Data> Writable for Resource<D, ReadWrite> { // ...
+```
+
 Bringing It All Together: The `Session` Trait
 ---------------------------------------------
 
 ```rust
 pub trait Session: Drop {
-  
-    fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where D: Data,
-          R: ReadOnlyResource<Value = D>;
 
-    fn readw<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where D: Data,
-          R: ReadWriteResource<Value = D>;
+    fn read<R: Readable>(
+        &self,
+        resource: &R
+    ) -> FpgaApiResult<R::Value>;
 
-    fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
-    where D: Data,
-          R: ReadWriteResource<Value = D>;
+    fn write<R: Writable>(
+        &mut self,
+        resource: &R,
+        val: R::Value
+    ) -> FpgaApiResult<()>
 }
 ```
 
-Implementing `Session` for Memory-Mapped FPGA I/O
+Implementing `Session` for Memory-Mapped File I/O
 -------------------------------------------------
 
 ```rust
 impl Session for MmapSesh {
-    fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where
-        D: Data,
-        R: ReadOnlyResource<Value = D>,
+    fn read<R: Readable>(
+        &self,
+        resource: &R
+    ) -> FpgaApiResult<R::Value>
     {
         let start = resource.byte_offset();
         let stop = start + resource.size_in_bytes();
         let slc = &self.mmap[start..stop];
-        D::from_le_bytes(slc)
+        R::Value::from_le_bytes(slc)
     }
     // -- snip --
 ```
@@ -590,10 +609,11 @@ Implementing `Session` for Memory-Mapped FPGA I/O
 -------------------------------------------------
 ```rust
     // -- snip --
-    fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
-    where
-        D: Data,
-        R: ReadWriteResource<Value = D>,
+    fn write<R: Writable>(
+        &mut self,
+        resource: &R,
+        val: R::Value
+    ) -> FpgaApiResult<()>
     {
         let start = resource.byte_offset();
         let stop = start + resource.size_in_bytes();

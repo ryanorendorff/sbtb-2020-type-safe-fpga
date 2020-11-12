@@ -1,6 +1,6 @@
 //! Implementation of FPGA resources.
 
-use crate::traits::{Data, IOState, ReadOnly, ReadOnlyResource, ReadWrite, ReadWriteResource};
+use crate::traits::{Data, IOState, ReadOnly, ReadWrite, Readable, Writable};
 
 use std::marker::PhantomData;
 
@@ -27,13 +27,19 @@ impl<D: Data, I: IOState> std::fmt::Display for Resource<D, I> {
         write!(f, "{} at byte offset {}", self.name, self.offset)
     }
 }
-impl<D: Data> ReadOnlyResource for Resource<D, ReadOnly> {
+impl<D: Data> Readable for Resource<D, ReadOnly> {
     type Value = D;
     fn byte_offset(&self) -> usize {
         self.offset
     }
 }
-impl<D: Data> ReadWriteResource for Resource<D, ReadWrite> {
+impl<D: Data> Readable for Resource<D, ReadWrite> {
+    type Value = D;
+    fn byte_offset(&self) -> usize {
+        self.offset
+    }
+}
+impl<D: Data> Writable for Resource<D, ReadWrite> {
     type Value = D;
     fn byte_offset(&self) -> usize {
         self.offset

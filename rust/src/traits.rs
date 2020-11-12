@@ -14,8 +14,8 @@ pub trait Data: Sized {
     fn to_be_bytes(self) -> Vec<u8>;
 }
 
-/// A read-only FPGA resource.
-pub trait ReadOnlyResource {
+/// A readable FPGA resource.
+pub trait Readable {
     /// Data value type of the resource.
     type Value: Data;
     /// Memory offset.
@@ -26,7 +26,7 @@ pub trait ReadOnlyResource {
     }
 }
 /// A writeable FPGA resource.
-pub trait ReadWriteResource {
+pub trait Writable {
     /// Data value type of the resource.
     type Value: Data;
     /// Memory offset.
@@ -39,21 +39,10 @@ pub trait ReadWriteResource {
 
 /// Trait to wrap FPGA hardware with "session" API.
 pub trait Session: Drop {
-    /// Read a read-only resource.
-    fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where
-        D: Data,
-        R: ReadOnlyResource<Value = D>;
-    /// Read a read/write resource.
-    fn readw<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where
-        D: Data,
-        R: ReadWriteResource<Value = D>;
-    /// Write to a read/write resource.
-    fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
-    where
-        D: Data,
-        R: ReadWriteResource<Value = D>;
+    /// Read a readable resource.
+    fn read<R: Readable>(&self, resource: &R) -> FpgaApiResult<R::Value>;
+    /// Write to a writable resource.
+    fn write<R: Writable>(&mut self, resource: &R, val: R::Value) -> FpgaApiResult<()>;
 }
 
 /// Trait to implement typestates for separating read/write entities.
