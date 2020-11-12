@@ -378,7 +378,7 @@ The major components of our Session API:
 
 1. Express application-specific resources (*e.g.*, registers).
 2. The session that wraps the FPGA and all interaction with it.
-3. Link these together in a way that is ergonomic and type safe.
+3. Link these together in a way that is type safe and ergonomic.
 
 ![](./fig/session_api.pdf){ width=320 }
 
@@ -523,6 +523,8 @@ Encode `Session` HW Invariant: Finalization
 
 ```rust
 pub trait Session: Drop { // Note **must** implement `Drop`.
+// -- snip --
+impl Session for MmapSesh {
 // -- snip --
 impl Drop for MmapSesh {
     fn drop(&mut self) {
