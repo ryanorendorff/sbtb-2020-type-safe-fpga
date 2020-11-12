@@ -303,15 +303,17 @@ Blah blah
 Rust program to interact with the FPGA
 ======================================
 
-The Big Picture -- Safe Control of our FPGA Hardware
+The Big Picture -- Safe Control of Our FPGA Hardware
 ----------------------------------------------------
 
 ![](./fig/high_level_host_and_fpga.pdf)
 
+A common paradigm to interact with an FPGA is via a host CPU.
+
 Key Concepts
 ------------
 
-We will build software that abstracts over the FPGA from the host's perspective. We will shoot for all of the following using the Rust type system:
+We will build software that abstracts over the FPGA from the host CPU's perspective. We will shoot for all of the following using the Rust type system:
 
 - Encode and enforce HW invariants.
 - Push as much as possible to compile-time checks.
@@ -345,9 +347,9 @@ The major components of our Session API:
 
 1. Expressing application-specific resources (*e.g.*, registers).
 2. The session that wraps the FPGA and all interaction with it.
-3. Linking these together in a way that is ergonomic and safe.
+3. Linking these together in a way that is ergonomic and type safe.
 
-ADD FIG
+![](./fig/session_api.pdf){ width=300 }
 
 Generically Modeling FPGA Resources with Traits
 -----------------------------------------------
@@ -355,7 +357,8 @@ Generically Modeling FPGA Resources with Traits
 Traits are one of the anchors of the Rust type system. They allow you to define
 shared behavior and constraints for sets of types.
 
-They are similar to typeclasses in Haskell and interfaces in Java.
+They are similar to typeclasses in Haskell, interfaces in Java, and traits in
+Scala.
 
 Encoding the Data Type/Primitive with a Trait
 ---------------------------------------------
@@ -409,9 +412,9 @@ pub struct Resource<D: Data, I: IOState> {
 }
 ```
 
-For any resource, the only thing reified in memory at runtime is a `name` and
-(byte) `offset`. The `D` and `I` typestates determine the available operations
-associated with the FPGA (through the `Session`).
+For any resource, only a `name` and a (byte) `offset` are reified at runtime.
+The `D` and `I` typestates determine the available operations associated with
+the FPGA (through the `Session`).
 
 What Does This Give Us?
 -----------------------
@@ -423,12 +426,13 @@ In application code:
 
 ```Rust
 let sesh = take_fpga_session();
-let input_point = Resource::<(u32, u32), ReadWrite>::new(...);
-let output_class = Resource::<u32, ReadOnly>::new(...);
-// -- snip --
-sesh.write(&input_point, (1.3, -2.7))?; // Comp fail (write wrong type).
-let v: f32 = sesh.read(&output_class)?; // Comp fail (read wrong type).
-sesh.write(&output_class, 1u32)?;       // Comp fail (write read-only).
+let input_point = Resource::<(I7F25, I7F25), ReadWrite>::new(...);
+let output_class = Resource::<I7F25, ReadOnly>::new(...);
+// -- snip -- Note: `I7F25` is a "fixed point" numeric type.
+let (x, y): (f32, f32) = (1.3, -2.7);
+sesh.write(&input_point, (x, y))?;                // Comp fail (type).
+let v: u32 = sesh.read(&output_class)?;           // Comp fail (type).
+sesh.write(&output_class, I7F25::from_num(1.0))?; // Comp fail (R-only).
 ```
 
 Now, to the `Session` Type
@@ -466,8 +470,8 @@ Encode `Session` HW Invariant: Initialization and Finalization
 Rust's RAII and affine type system allows us to ensure FPGA/HW state invariants:
 
 - Can only create a `Session` through constructor that performs proper initialization.
-- Must implement `Drop` to finalize state of the FPGA (and any associated HW) when we're done.
-- You cannot then forget to `Drop` -- in happy or sad code paths!
+- \textcolor[rgb]{0,0.5,0}{Must implement `Drop` to finalize state of the FPGA (and any associated HW) when we're done.}
+- \textcolor[rgb]{0,0.5,0}{You cannot then forget to `Drop` -- in happy or sad code paths!}
 
 Encode `Session` HW Invariant: Initialization
 ---------------------------------------------
@@ -520,17 +524,16 @@ Bringing It All Together: The `Session` Trait
 ```rust
 pub trait Session: Drop {
     fn read<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where
-        D: Data,
-        R: ReadOnlyResource<Value = D>;
+    where D: Data,
+          R: ReadOnlyResource<Value = D>;
+
     fn readw<D, R>(&self, resource: &R) -> FpgaApiResult<D>
-    where
-        D: Data,
-        R: ReadWriteResource<Value = D>;
+    where D: Data,
+          R: ReadWriteResource<Value = D>;
+
     fn write<D, R>(&mut self, resource: &R, val: D) -> FpgaApiResult<()>
-    where
-        D: Data,
-        R: ReadWriteResource<Value = D>;
+    where D: Data,
+          R: ReadWriteResource<Value = D>;
 }
 ```
 
@@ -570,11 +573,55 @@ Implementing `Session` for Memory-Mapped FPGA I/O
     }
 ```
 
+Point Quadrant Classifier: The Problem
+--------------------------------------
+
+Point Quadrant Classifier: The Code
+-----------------------------------
+
+```rust
+fn run() -> FpgaApiResult<()> {
+    // Get the FPGA singleton. Better not try and do this more than once!
+    let mut sesh = take_fpga_session();
+    // Define the resources.
+    let input_point = Resource::<(I7F25, I7F25), ReadWrite>::new(
+        "Input Point Registers(X, Y)",
+        POINT_NN_INPUT_VECTOR_OFFSET,
+    );
+    let output_class = Resource::<I7F25, ReadOnly>::new(
+        "Output Classification Register",
+        POINT_NN_OUTPUT_CLASS_OFFSET,
+    );
+    let (pos_x, neg_x) = (I7F25::from_num(1.5), I7F25::from_num(-1.5));
+    let (pos_y, neg_y) = (I7F25::from_num(2.5), I7F25::from_num(-2.5));
+    // -- snip --
+```
+
+Point Quadrant Classifier: The Code
+-----------------------------------
+```rust
+    // -- snip --
+    // Quadrant 1.
+    sesh.write(&input_point, (pos_x, pos_y))?;
+    let q1_actual = sesh.read(&output_class)?;
+    let q1_expected = I7F25::from_num(1.0);
+    // Quadrant 2.
+    sesh.write(&input_point, (neg_x, pos_y))?;
+    let q2_actual = sesh.read(&output_class)?;
+    let q2_expected = I7F25::from_num(-1.0);
+    // -- snip --
+}
+```
+
+Point Quadrant Classifier: Output Running on Board
+--------------------------------------------------
+
+![](./fig/point_quadrant_classifier_output.png)
+
 Conclusion
 ----------
 
 We are awesome.
-
 
 Questions?
 ----------
