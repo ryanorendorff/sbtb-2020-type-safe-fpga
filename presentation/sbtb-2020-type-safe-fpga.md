@@ -113,8 +113,8 @@ together and perform matrix-vector multiply.
 (<+>) = zipWith (+)
 ```
 
-Let's implement the linear algebra basics
------------------------------------------
+Let's implement the linear algebra basics: dot product
+------------------------------------------------------
 
 For the equation $y = g(Mx + b)$, we need to be able to add two vectors
 together and perform matrix-vector multiply.
@@ -124,11 +124,6 @@ together and perform matrix-vector multiply.
 (<.>) :: (KnownNat n, Num a)
       => Vec n a -> Vec n a -> a
 (<.>) xs ys = foldr1 (+) (zipWith (*) xs ys)
-
--- Matrix vector multiply: Mx
-(#>) :: (KnownNat m, KnownNat n, Num a)
-     => Matrix m n a -> Vec n a -> Vec m a
-(#>) m v = map (<.> v) m
 ```
 
 Compiling just the matrix vector multiply
@@ -137,12 +132,28 @@ Compiling just the matrix vector multiply
 If we compile just the dot product:
 
 ```haskell
-(<.>) xs ys = foldr (+) 0 (zipWith (*) xs ys)
+(<.>) xs ys = foldr1 (+) (zipWith (*) xs ys)
 ```
 
 We can see what Clash will generate for a simple case (4 element vector).
 
 ![](./fig/dotproduct-foldr1.pdf)
+
+
+Let's implement the linear algebra basics: matrix-vector multiply
+-----------------------------------------------------------------
+
+To round out our $y = g(Mx + b)$, we need to know how to do the $Mx$ part! This
+is performing the dot product with each row in the matrix.
+
+```haskell
+type Matrix m n a = Vec m (Vec n a)
+
+-- Matrix vector multiply: Mx
+(#>) :: (KnownNat m, KnownNat n, Num a)
+     => Matrix m n a -> Vec n a -> Vec m a
+(#>) m v = map (<.> v) m
+```
 
 
 With the basics down, let's define the neural network type
@@ -245,7 +256,7 @@ We can now synthesize what we have into something the FPGA can understand using
 
 ```haskell
 topEntity :: Vec 2 (SFixed 7 25) -> Vec 1 (SFixed 7 25)
-topEntity = map classify . runNet exNetwork . map classify
+topEntity = runNet exNetwork
 ```
 
 . . .
@@ -258,6 +269,7 @@ Note that
   to layout the hardware correctly.
 - We don't have access to floating point numbers, so we use fixed point numbers
   instead.
+
 :::
 
 Meeting timing constraints
