@@ -342,7 +342,7 @@ user-facing `Session` API built on top of memory-mapped file I/O with the FPGA.
 Key Concepts
 ------------
 
-We will build a Rust API and shoot for the following using the type system:
+In our API, we will shoot for the following using Rust's type system:
 
 - Encode and enforce HW invariants.
 - Push as much as possible to compile-time checks.
@@ -378,7 +378,7 @@ The major components of our Session API:
 
 1. Express application-specific resources (*e.g.*, registers).
 2. The session that wraps the FPGA and all interaction with it.
-3. Link these together in a way that is type safe and ergonomic.
+3. Link these together with the type system in a way that is ergonomic.
 
 ![](./fig/session_api.pdf){ width=320 }
 
@@ -513,7 +513,7 @@ pub trait Session: Drop { // Note **must** implement `Drop`.
 impl Session for MmapSesh {
 // -- snip --
 impl Drop for MmapSesh {
-    fn drop(&mut self) {
+    fn drop(&mut self) { // You never have to manually call this.
         // Enforce critical FPGA/HW invariants for "final" state.
         // -- snip --
     }
@@ -535,7 +535,8 @@ fn main() {
 }
 ```
 
-Whether we `panic` or not, our session will be `Drop`ped.
+Whether we `panic` or not, our session will be `Drop`ped and our FPGA/HW will
+be in the appropriate state.
 
 Bringing It All Together in the Session: Helper Traits
 ------------------------------------------------------
