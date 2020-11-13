@@ -21,7 +21,8 @@ let
   };
 
 in pkgs.stdenv.mkDerivation {
-  name = "Programming-machine-learning-algorithms-in-hardware-sanely-using-Haskell-and-Rust";
+  name =
+    "Programming-machine-learning-algorithms-in-hardware-sanely-using-Haskell-and-Rust";
 
   src = gitignoreSource ./.;
 
