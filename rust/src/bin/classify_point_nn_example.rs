@@ -21,7 +21,6 @@ fn run() -> FpgaApiResult<()> {
     );
 
     // Locations (Fixed point 7/25 values).
-    let zero = I7F25::from_num(0);
     let (pos_x, neg_x) = (I7F25::from_num(1.5), I7F25::from_num(-1.5));
     let (pos_y, neg_y) = (I7F25::from_num(2.5), I7F25::from_num(-2.5));
 
@@ -29,8 +28,6 @@ fn run() -> FpgaApiResult<()> {
     // Quadrant 1.
     println!("\nQuadrant 1");
     println!("==========\n");
-    sesh.write(&input_point, (zero, zero))?;
-    assert_eq!(sesh.read(&input_point)?, (zero, zero));
     println!("Writing ({}, {}) to {}", pos_x, pos_y, &input_point);
     sesh.write(&input_point, (pos_x, pos_y))?;
     println!("Reading result from {}", &output_class);
@@ -42,9 +39,7 @@ fn run() -> FpgaApiResult<()> {
     // Quadrant 2.
     println!("\nQuadrant 2");
     println!("==========\n");
-    sesh.write(&input_point, (zero, zero))?;
-    assert_eq!(sesh.read(&input_point)?, (zero, zero));
-    println!("Writing ({}, {}) to {}", pos_x, pos_y, &input_point);
+    println!("Writing ({}, {}) to {}", neg_x, pos_y, &input_point);
     sesh.write(&input_point, (neg_x, pos_y))?;
     println!("Reading result from {}", &output_class);
     let q2_actual = sesh.read(&output_class)?;
@@ -55,9 +50,7 @@ fn run() -> FpgaApiResult<()> {
     // Quadrant 3.
     println!("\nQuadrant 3");
     println!("==========\n");
-    sesh.write(&input_point, (zero, zero))?;
-    assert_eq!(sesh.read(&input_point)?, (zero, zero));
-    println!("Writing ({}, {}) to {}", pos_x, pos_y, &input_point);
+    println!("Writing ({}, {}) to {}", neg_x, neg_y, &input_point);
     sesh.write(&input_point, (neg_x, neg_y))?;
     println!("Reading result from {}", &output_class);
     let q3_actual = sesh.read(&output_class)?;
@@ -68,9 +61,7 @@ fn run() -> FpgaApiResult<()> {
     // Quadrant 4.
     println!("\nQuadrant 4");
     println!("==========\n");
-    sesh.write(&input_point, (zero, zero))?;
-    assert_eq!(sesh.read(&input_point)?, (zero, zero));
-    println!("Writing ({}, {}) to {}", pos_x, pos_y, &input_point);
+    println!("Writing ({}, {}) to {}", pos_x, neg_y, &input_point);
     sesh.write(&input_point, (pos_x, neg_y))?;
     println!("Reading result from {}", &output_class);
     let q4_actual = sesh.read(&output_class)?;

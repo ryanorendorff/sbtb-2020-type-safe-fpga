@@ -10,7 +10,7 @@ use sbtb::{
 
 use fixed::types::I7F25;
 
-const NUM_POINTS: usize = 100;
+const NUM_POINTS: usize = 500;
 
 fn run() -> FpgaApiResult<()> {
     // Get the FPGA singleton. Better not try and do this more than once!
@@ -20,7 +20,7 @@ fn run() -> FpgaApiResult<()> {
     let mut rng = rand::thread_rng();
     let mut point_vec: Vec<(I7F25, I7F25)> = Vec::with_capacity(NUM_POINTS);
     for _ in 0..NUM_POINTS {
-        let (x, y): (f32, f32) = (rng.gen_range(-10.0, 10.0), rng.gen_range(-10.0, 10.0));
+        let (x, y): (f32, f32) = (rng.gen_range(-126.0, 126.0), rng.gen_range(-126.0, 126.0));
         let (x_fx, y_fx) = (I7F25::from_num(x), I7F25::from_num(y));
         point_vec.push((x_fx, y_fx));
     }
