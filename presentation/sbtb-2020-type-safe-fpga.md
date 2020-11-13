@@ -645,6 +645,7 @@ pub trait Session: Drop {
         resource: &R,
         val: R::Value
     ) -> FpgaApiResult<()>
+    
 }
 ```
 
