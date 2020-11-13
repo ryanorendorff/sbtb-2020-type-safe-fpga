@@ -504,20 +504,6 @@ Rust's RAII and affine type system allows us to ensure FPGA/HW state invariants:
 - \textcolor[rgb]{0,0.5,0}{Must implement `Drop` to finalize state of the FPGA (and any associated HW) when we're done.}
 - \textcolor[rgb]{0,0.5,0}{You cannot then forget to `Drop` -- in happy or sad code paths!}
 
-Encode `Session` HW Invariant: Initialization
----------------------------------------------
-
-```rust
-impl MmapSession {
-    // The only way to get an instance of our `Session` type.
-    pub fn new(mmap: MmapMut) -> FpgaApiResult<Self> {
-        let mut sesh = Self { mmap };
-        sesh.initialize()?; // HW initialization here.
-        Ok(sesh)
-    }
-}
-```
-
 Encode `Session` HW Invariant: Finalization
 -------------------------------------------
 
@@ -555,12 +541,12 @@ Bringing It All Together in the Session: Helper Traits
 ------------------------------------------------------
 
 ```rust
-pub trait Readable {
+pub trait Readable { // A readable FPGA resource.
     type Value: Data;
     fn byte_offset(&self) -> usize;
     fn size_in_bytes(&self) -> usize;
 }
-pub trait Writable {
+pub trait Writable { // A writable FPGA resource.
     type Value: Data;
     fn byte_offset(&self) -> usize;
     fn size_in_bytes(&self) -> usize;
