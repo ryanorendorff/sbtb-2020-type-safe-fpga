@@ -543,8 +543,8 @@ Encode `Session` HW Invariant: Initialization and Finalization
 Rust's RAII and affine type system allows us to ensure FPGA/HW state invariants:
 
 - Can only create a `Session` through constructor that performs proper initialization.
-- \textcolor[rgb]{0,0.5,0}{Must implement `Drop` to finalize state of the FPGA (and any associated HW) when we're done.}
-- \textcolor[rgb]{0,0.5,0}{You cannot then forget to `Drop` -- in happy or sad code paths!}
+- **\textcolor[rgb]{0,0.5,0}{Must implement `Drop` to finalize state of the FPGA (and any associated HW) when we're done.}**
+- **\textcolor[rgb]{0,0.5,0}{You cannot then forget to `Drop` -- in happy or sad code paths!}**
 
 Encode `Session` HW Invariant: Finalization
 -------------------------------------------
@@ -682,7 +682,7 @@ Point Quadrant Classifier: The Code
 
 ```rust
 fn run() -> FpgaApiResult<()> {
-    // Get the FPGA singleton. Better not try and do this more than once!
+    // Get the FPGA singleton. Better not try this more than once!
     let mut sesh = take_fpga_session();
     // Define the resources.
     let input_point = Resource::<(I7F25, I7F25), ReadWrite>::new(
@@ -732,6 +732,7 @@ Questions?
 
 Our slides and the code to do this yourself can be found at:
 
-https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga
+\undovspacepause
+**github.com/ryanorendorff/sbtb-2020-type-safe-fpga**
 
-<figure>![](./fig/question.jpg){ style="width: 70%; margin: auto;" }</figure>
+![](./fig/question.pdf)
