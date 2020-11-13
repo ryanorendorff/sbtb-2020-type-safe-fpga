@@ -213,40 +213,44 @@ data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
 
 ```haskell
     (:>>) :: (KnownNat i, KnownNat o, KnownNat h)
-          => (LayerTransition i h a)
-          -> (Network h hs o a)
-          -> Network i (h ': hs) o a
+          => LayerTransition i h a   -- New input layer
+          -> Network h hs o a        -- Existing network
+          -> Network i (h ': hs) o a -- New network
 ```
+
+To add a new input layer in front, the _number of output nodes from the new
+layer must match the number of input nodes to the existing network!_
 
 [^2]: Inspired by [Justin Le's](https://blog.jle.im/entry/practical-dependent-types-in-haskell-1.html) dependent type NN structure.
 
-Using `runLayer` to move from one layer in the NN to the next
--------------------------------------------------------------
+
+`runLayer` consumes a `LayerTransition`, returning the output nodes
+----------------------------------------------------------------------
 
 We can now run a layer transition by applying our equation $y = g(Mx + b)$ to
 some input vector $x$ to output vector $y$.
 
 ```haskell
 runLayer :: (KnownNat i, KnownNat o, Num a)
-         => (LayerTransition i o a)
-         -> Vec i a -- Input nodes
-         -> Vec o a -- Output nodes
+         => LayerTransition i o a -- Layer to evaluate
+         -> Vec i a               -- Input nodes to the layer
+         -> Vec o a               -- Output nodes from the layer
 runLayer (LayerTransition m b g) x =
   map g $ m #> x <+> b
 -- Precisely y = g(Mx + b) from before!
 ```
 
 
-`runNet` is a fold that allows us to process all the layers
------------------------------------------------------------
+`runNet` folds the `LaryTransitions`s down to output nodes
+-------------------------------------------------------------
 
 Now we can run our network by moving data from one layer to the next.
 
 ```haskell
 runNet :: (KnownNat i, KnownNat o, Num a, Ord a)
-       => Network i hs o a -- ^ Dense neural network
-       -> Vec i a -- ^ Input vector
-       -> Vec o a -- ^ Result vector
+       => Network i hs o a -- Neural network to fold
+       -> Vec i a          -- Input nodes
+       -> Vec o a          -- Nodes nodes
 ```
 
 . . .
