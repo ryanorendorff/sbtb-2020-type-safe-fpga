@@ -13,6 +13,10 @@ header-includes: |
   \setbeamercolor{frametitle}{fg=white,bg=FoundersRock}
   \setbeamercolor{title separator}{fg=Medalist,bg=white}
 
+  \makeatletter
+  \def\verbatim@nolig@list{}
+  \makeatother
+
   \usepackage{fontspec}
   \setmonofont{Iosevka}
   \usefonttheme[onlymath]{serif}
