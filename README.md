@@ -3,7 +3,7 @@
 ![Presentation PDF](https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga/workflows/Presentation%20PDF/badge.svg)
 [![Download PDF](https://img.shields.io/badge/-Download%20PDF-blue)](https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga/raw/gh-pages/SBTB-2020-Type-Safe-FPGA.pdf)
 
-Using Depdentent and Affine Types for robust FPGA programming.
+Using Dependent and Affine Types for robust FPGA programming.
 
 Presented at [Scale by the Bay 2020 (SBTB
 2020)](https://scalebythebay2020.sched.com/event/e55t/programming-machine-learning-algorithms-in-hardware-sanely-using-haskell-and-rust).
