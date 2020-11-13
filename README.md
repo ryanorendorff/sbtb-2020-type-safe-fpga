@@ -9,59 +9,6 @@ Presented at [Scale by the Bay 2020 (SBTB
 2020)](https://scalebythebay2020.sched.com/event/e55t/programming-machine-learning-algorithms-in-hardware-sanely-using-haskell-and-rust).
 
 
-## How to run
-
-We are using the DE10-Nano FPGA board, as it is relatively cheap and with plenty
-of documentation.
-
-
-### Installing [Intel Quantus Prime Lite][quartus] on NixOS
-
-We compiled the FPGA programs interactively in a NixOS 20.03 virtual machine
-using [VMware Fusion Player 12][vmware-fusion], which is now free! If you would
-like to install NixOS in a VMware instance as well, we have provided the
-configuration file in `nixos/configuration.nix`.
-
-With a NixOS machine up, you can do the following to get started with
-development on the FPGA.
-
-1. Download this repository and run `nix-env -f quartus.nix` to install [Intel Quantus Prime Lite][quartus]. This is used to compile the code for the FPGA.
-
-2. You will then need to modify your `/etc/nixos/configuration.nix` to [include the following](https://rocketboards.org/foswiki/Documentation/UsingUSBBlasterUnderLinux):
-
-    ```
-    services.udev.extraRules = ''
-      # USB-Blaster
-      SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6001", MODE="0666"
-      SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6002", MODE="0666"
-    
-      SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6003", MODE="0666"
-    
-      # USB-Blaster II
-      SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6010", MODE="0666"
-      SUBSYSTEM=="usb", ATTRS{idVendor}=="09fb", ATTRS{idProduct}=="6810", MODE="0666"
-    '';
-    ```
-    
-    This enables the FPGA to be programmed through the USB Blaster II interface
-    without using a root account.
-
-
-### Tutorials for using Quartus
-
-Tutorials for using Quartus can be found at the following URL:
-
-https://github.com/intel-iot-devkit/terasic-de10-nano-kit/
-
-All three tutorials mentioned are great reading for getting started with
-programming the FPGA and interfacing with it through Linux.
-
-Additionally, there is a [tutorial for embedded
-linux](https://bitlog.it/20170820_building_embedded_linux_for_the_terasic_de10-nano.html)
-applications. It describes how to build a simple LED component from the Golden
-Hardware Reference Design (GHRD) and build a Linux kernel around it.
-
-
 ## Abstract
 
 We’re all used to programming software. But what about programming
@@ -97,6 +44,22 @@ perform important hardware clean up when these resources go out of scope. This
 application will demonstrate how Rust’s unique type system enables both an
 ergonomic and compile time-validated interface to the Clash validated FPGA
 hardware.
+
+
+## Tutorials for using Quartus
+
+Tutorials for using Quartus can be found at the following URL:
+
+https://github.com/intel-iot-devkit/terasic-de10-nano-kit/
+
+All three tutorials mentioned are great reading for getting started with
+programming the FPGA and interfacing with it through Linux.
+
+Additionally, there is a [tutorial for embedded
+linux](https://bitlog.it/20170820_building_embedded_linux_for_the_terasic_de10-nano.html)
+applications. It describes how to build a simple LED component from the Golden
+Hardware Reference Design (GHRD) and build a Linux kernel around it.
+
 
 <!-- References -->
 [quartus]: https://fpgasoftware.intel.com/?edition=lite
