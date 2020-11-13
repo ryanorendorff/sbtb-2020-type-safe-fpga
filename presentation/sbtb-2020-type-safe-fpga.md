@@ -37,7 +37,7 @@ TODO: Figure out how to add newline with the presentation URL in the author
 
 In this talk, we will go through
 
-- Overview of forward propagation for neural networks
+- Forward propagation for neural networks.
 - How to implement forward propagation using Clash on an FPGA.
 - How to make accessing the FPGA safely using Rust.
 
