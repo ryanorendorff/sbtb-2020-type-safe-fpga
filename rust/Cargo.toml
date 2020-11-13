@@ -9,7 +9,10 @@ edition = "2018"
 [dependencies]
 memmap = "0.7.0"
 lazy_static = "1.4.0"
-fixed = "1.5.0"
+fixed = { version = "1.5.0", features = ["serde"] }
+rand = "0.7.3"
+serde = { version = "1.0.117", features = ["derive"] }
+csv = "1.1.4"
 
 [lib]
 name = "sbtb"
@@ -18,3 +21,7 @@ path = "src/lib.rs"
 [[bin]]
 name = "classify_point_nn_example"
 path = "src/bin/classify_point_nn_example.rs"
+
+[[bin]]
+name = "classify_many_points_nn"
+path = "src/bin/classify_many_points_nn.rs"
