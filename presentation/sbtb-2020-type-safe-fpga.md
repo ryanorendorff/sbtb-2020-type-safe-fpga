@@ -64,9 +64,9 @@ TODO: Figure out how to add newline with the presentation URL in the author
 
 In this talk, we will go through
 
-- Forward propagation for neural networks.
+- Forward propagation (inference) for neural networks.
 - How to implement forward propagation using Clash on an FPGA.
-- How to make accessing the FPGA safely using Rust.
+- How to make accessing the FPGA safe using Rust.
 
 
 Architecture
@@ -645,7 +645,7 @@ pub trait Session: Drop {
         resource: &R,
         val: R::Value
     ) -> FpgaApiResult<()>
-    
+
 }
 ```
 
