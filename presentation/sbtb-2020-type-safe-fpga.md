@@ -43,10 +43,10 @@ Brain Computer Interface (BCI) research.
 
 \
 
-- Has been researching novel image and data reconstruction methods in the
+- I have been researching novel image and data reconstruction methods in the
   biomedical space for the last decade, usually using signal theory and linear
   algebra.
-- Loves to poke around with theorem proving, programming language theory and
+- I love to poke around with theorem proving, programming language theory and
   dependently typed languages such as Agda.
 
 :::
