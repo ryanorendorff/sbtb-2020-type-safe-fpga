@@ -26,6 +26,33 @@ header-includes: |
   \newcommand{\smallnspace}{\vspace*{-0.4em}}
 ---
 
+Brief intro: Ryan Orendorff
+---------------------------
+
+Brief intro: Daniel Hensley
+---------------------------
+
+:::::::::::::: {.columns}
+::: {.column width="10%"}
+
+![](./fig/daniel_pic.jpg){ width=50 }
+
+:::
+::: {.column width="90%"}
+
+I currently manage the software team at Magnetic Insight, Inc. (MI). We build
+medical imaging scanners with a focus on magnetic particle imaging (MPI).
+
+\
+
+- Background in signal processing, image reconstruction, applied math, and
+  electromagnetic physics.
+- At MI, we have a lot of embedded and HW-facing code to operate big,
+  scary machines. Correctness is very important!
+- We've used FPGAs and Rust to great effect at MI.
+
+:::
+::::::::::::::
 
 Outline
 -------
@@ -373,7 +400,7 @@ Rust program to interact with the FPGA
 ======================================
 
 
-The Big Picture -- Safe Control of Our FPGA Hardware
+The big picture -- safe control of our FPGA hardware
 ----------------------------------------------------
 
 ![](./fig/high_level_host_and_fpga.pdf)
@@ -381,7 +408,7 @@ The Big Picture -- Safe Control of Our FPGA Hardware
 A common paradigm to interact with an FPGA is via a host CPU. We will build a
 user-facing `Session` API built on top of memory-mapped file I/O with the FPGA.
 
-Key Concepts
+Key concepts
 ------------
 
 In our API, we will shoot for the following using Rust's type system:
@@ -390,7 +417,7 @@ In our API, we will shoot for the following using Rust's type system:
 - Push as much as possible to compile-time checks.
 - Maintain ergonomics!
 
-Key Concepts
+Key concepts
 ------------
 
 In the end, we want something that looks like this:
@@ -406,14 +433,14 @@ let quad_classification = sesh.read(&output_class)?;
 
 and has compile-time guarantees so we can sleep well at night!
 
-How Do We Get There?
+How do we get there?
 --------------------
 
 We will build a *Session* API using Rust:
 
 ![](./fig/type_system_components.pdf)
 
-The Design
+The design
 ----------
 
 The major components of our Session API:
@@ -424,7 +451,7 @@ The major components of our Session API:
 
 ![](./fig/session_api.pdf){ width=320 }
 
-Generically Modeling FPGA Resources with Traits and Typestates
+Generically modeling FPGA resources with traits and typestates
 --------------------------------------------------------------
 
 Traits are one of the anchors of the Rust type system. They allow you to define
@@ -433,7 +460,7 @@ shared behavior and constraints for sets of types.
 They are similar to typeclasses in Haskell, interfaces in Java, and traits in
 Scala.
 
-Encoding the Data Type/Primitive with a Trait
+Encoding the data type/primitive with a trait
 ---------------------------------------------
 
 ```rust
@@ -449,7 +476,7 @@ pub trait Data: Sized {
 `Data` is implemented for primitives (*e.g.*, `u32`, `f32`, etc.). To plug into
 the `Session` API with a custom data type, just implement `Data`!
 
-Controlling Read/Write with a Typestate
+Controlling read/write with a typestate
 ---------------------------------------
 
 Typestates are a great way to encode invariants in the type system. There is no
@@ -459,7 +486,7 @@ runtime cost and if it compiles, the encoded invariants are guaranteed.
 
 *Note*: The common `Builder` pattern in Rust is a form of the latter.
 
-Encoding Resource Allowed I/O with Typestates in Rust
+Encoding allowed resource I/O with typestates in Rust
 -----------------------------------------------------
 
 ```Rust
@@ -473,7 +500,7 @@ pub enum ReadWrite {}
 impl IOState for ReadWrite {}
 ```
 
-Putting These Together: Expressing Any FPGA Resource
+Putting these together: expressing any FPGA resource
 -----------------------------------------------------
 
 ```rust
@@ -489,7 +516,7 @@ For any resource, only a `name` and a (byte) `offset` are reified at runtime.
 The `D` and `I` typestates determine the available operations associated with
 the FPGA (through the `Session`).
 
-What Does This Give Us?
+What does this give us?
 -----------------------
 
 In application code:
@@ -508,7 +535,7 @@ let v: u32 = sesh.read(&output_class)?;           // Comp fail (type).
 sesh.write(&output_class, I7F25::from_num(1.0))?; // Comp fail (R-only).
 ```
 
-Now, to the `Session` Type
+Now, to the `Session` type
 --------------------------
 
 The opaque `Session` type represents the FPGA and our interaction with it.
@@ -516,7 +543,7 @@ The opaque `Session` type represents the FPGA and our interaction with it.
 We will encode the singular nature of the HW and the importance of maintaining appropriate
 state with the help of the type system.
 
-Encode `Session` HW Invariant: Singleton
+Encode `Session` HW invariant: singleton
 ----------------------------------------
 
 We can't let our devs arbitrarily spawn up or duplicate sessions (there's only
@@ -537,7 +564,7 @@ pub fn take_fpga_session() -> MmapSesh {
 let mut sesh = take_fpga_session();
 ```
 
-Encode `Session` HW Invariant: Initialization and Finalization
+Encode `Session` HW invariant: initialization and finalization
 --------------------------------------------------------------
 
 Rust's RAII and affine type system allows us to ensure FPGA/HW state invariants:
@@ -546,7 +573,7 @@ Rust's RAII and affine type system allows us to ensure FPGA/HW state invariants:
 - **\textcolor[rgb]{0,0.5,0}{Must implement `Drop` to finalize state of the FPGA (and any associated HW) when we're done.}**
 - **\textcolor[rgb]{0,0.5,0}{You cannot then forget to `Drop` -- in happy or sad code paths!}**
 
-Encode `Session` HW Invariant: Finalization
+Encode `Session` HW invariant: finalization
 -------------------------------------------
 
 ```rust
@@ -562,7 +589,7 @@ impl Drop for MmapSesh {
 }
 ```
 
-What Does This Give Us?
+What does this give us?
 -----------------------
 
 With `Drop` implemented, we cannot "forget" to cleanup the FPGA and associated resources:
@@ -580,7 +607,7 @@ fn main() {
 Whether we `panic` or not, our session will be `Drop`ped and our FPGA/HW will
 be in the appropriate state.
 
-Bringing It All Together in the Session: Helper Traits
+Bringing tt all together in the session: helper traits
 ------------------------------------------------------
 
 ```rust
@@ -599,7 +626,7 @@ impl<D: Data> Readable for Resource<D, ReadWrite> { // ...
 impl<D: Data> Writable for Resource<D, ReadWrite> { // ...
 ```
 
-Bringing It All Together: The `Session` Trait
+Bringing tt all together: the `Session` trait
 ---------------------------------------------
 
 :::::::::::::: {.columns}
@@ -632,8 +659,8 @@ based on what resources are defined and used in a given application.
 :::
 ::::::::::::::
 
-Implementing `Session` for Memory-Mapped File I/O
--------------------------------------------------
+Implementing `Session` for FPGA memory-mapped file I/O
+------------------------------------------------------
 
 ```rust
 impl Session for MmapSesh {
@@ -651,8 +678,8 @@ impl Session for MmapSesh {
 ```
 
 
-Implementing `Session` for Memory-Mapped FPGA I/O
--------------------------------------------------
+Implementing `Session` for FPGA memory-mapped file I/O
+------------------------------------------------------
 
 ```rust
     // -- snip --
@@ -671,14 +698,14 @@ Implementing `Session` for Memory-Mapped FPGA I/O
     }
 ```
 
-Point Quadrant Classifier: Visualization of Solution
-----------------------------------------------------
+Point quadrant classifier inference: visualization of solution
+--------------------------------------------------------------
 
 ![](./fig/nn-output.pdf)
 
 
-Point Quadrant Classifier: The Code
------------------------------------
+Point quadrant classifier inference: the code
+---------------------------------------------
 
 ```rust
 fn run() -> FpgaApiResult<()> {
@@ -698,8 +725,8 @@ fn run() -> FpgaApiResult<()> {
     // -- snip --
 ```
 
-Point Quadrant Classifier: The Code
------------------------------------
+Point quadrant classifier inference: the code
+---------------------------------------------
 
 ```rust
     // -- snip --
@@ -716,16 +743,23 @@ Point Quadrant Classifier: The Code
 }
 ```
 
-Point Quadrant Classifier: Output Running on Board
---------------------------------------------------
+Point quadrant classifier inference: running on the board
+---------------------------------------------------------
 
 ![](./fig/point_quadrant_classifier_output.png)
 
-Conclusion
-----------
+Conclusions
+-----------
 
-We are awesome.
+Summary:
 
+- FPGAs allow you to map your HW to the algorithm. Neat!
+- Clash provides a sane way to write FPGA programs.
+- Rust provides a sane way to manage interactions with FPGA/HW.
+- We demonstrated this in a simple point classifier ML application.
+
+**Takeaway**: Type systems and architectures that push guarantees to
+compile time are really great for modeling and interacting with HW.
 
 Questions?
 ----------
