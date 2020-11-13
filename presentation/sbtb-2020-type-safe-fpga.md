@@ -45,7 +45,7 @@ has both an ARM processor and FPGA on one chip (SoC).
 
 
 - Low power
-- Very high throughput (GPU+ level)
+- High throughput (GPU-like level)
 - Deterministic timing
 
 
@@ -53,13 +53,16 @@ How is a neural network implemented?
 ------------------------------------
 
 A neural network is usually shown as a series of nodes with connections between
-them. But what does that mean?
+them [^1]. But what does that mean?
 
 <!--
 TODO: Make our own figure so that we are not copying anyone without permission.
 -->
 
 ![](./fig/nn.png)
+
+
+[^1]: https://www.kdnuggets.com/2019/11/designing-neural-networks.html
 
 
 Neural network basics: how to go from one layer to another
@@ -70,6 +73,7 @@ $y = g(Mx + b)$.
 
 ![](./fig/network-x.pdf)
 
+
 Neural network basics: how to go from one layer to another
 ----------------------------------------------------------
 
@@ -77,6 +81,7 @@ Going from one layer ($x$) to the next ($y$) is implemented using the equation
 $y = g(Mx + b)$.
 
 ![](./fig/network-M.pdf)
+
 
 Neural network basics: how to go from one layer to another
 ----------------------------------------------------------
@@ -86,6 +91,7 @@ $y = g(Mx + b)$.
 
 ![](./fig/network-b.pdf)
 
+
 Neural network basics: how to go from one layer to another
 ----------------------------------------------------------
 
@@ -93,6 +99,7 @@ Going from one layer ($x$) to the next ($y$) is implemented using the equation
 $y = g(Mx + b)$.
 
 ![](./fig/network-gy.pdf)
+
 
 Neural network basics: how to go from one layer to another
 ----------------------------------------------------------
@@ -134,13 +141,11 @@ together and perform matrix-vector multiply.
 Compiling just the matrix vector multiply
 -----------------------------------------
 
-If we compile just the dot product:
+If we compile just the dot product with 4 element vectors filled with `Int` :
 
 ```haskell
 (<.>) xs ys = foldr1 (+) (zipWith (*) xs ys)
 ```
-
-We can see what Clash will generate for a simple case (4 element vector).
 
 ![](./fig/dotproduct-foldr1.pdf)
 
@@ -185,6 +190,11 @@ Now we will create a list of layers by making a list of `LayerTransition`s.
 
 ```haskell
 data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
+```
+
+. . .
+
+```haskell
     OutputLayer :: (LayerTransition i o a) -> Network i '[] o a
 ```
 
@@ -196,6 +206,7 @@ data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
           -> (Network h hs o a)
           -> Network i (h ': hs) o a
 ```
+
 
 Running a `LayerTransition`
 ---------------------------
@@ -213,6 +224,7 @@ runLayer (LayerTransition b m g) x =
 -- Precisely y = g(Mx + b) from before!
 ```
 
+
 Clash Run Network
 -----------------
 
@@ -223,7 +235,17 @@ runNet :: (KnownNat i, KnownNat o, Num a, Ord a)
        => Network i hs o a -- ^ Dense neural network
        -> Vec i a -- ^ Input vector
        -> Vec o a -- ^ Result vector
+```
+
+. . .
+
+```haskell
 runNet (OutputLayer l) v = runLayer l v
+```
+
+. . .
+
+```haskell
 runNet (l :>> n) v = runNet n (runLayer l v)
 ```
 
@@ -254,8 +276,8 @@ The type level numbers force us to make a network where the sizes of the output
 of one layer match the input to the next!
 
 
-Clash Synthesize
-----------------
+Synthesizing FPGA hardware
+--------------------------
 
 We can now synthesize what we have into something the FPGA can understand using
 `clash File.hs --verilog`.
@@ -273,10 +295,11 @@ Note that
 
 - We had to specify the specific number type we were using. Clash must know this
   to layout the hardware correctly.
-- We don't have access to floating point numbers, so we use fixed point numbers
-  instead.
+- We had to specify which type of number we are using in order to synthesize the
+  hardware.
 
 :::
+
 
 Meeting timing constraints
 --------------------------
@@ -306,20 +329,22 @@ fold (+) $ unbundle $ register (repeat 0) $ zipWith (*) <$> xs <*> *ys)
 ![](./fig/dotproduct-register.pdf)
 
 
-
 Other benefits to Clash
 -----------------------
 
-Blah blah
+Since Clash is mostly just Haskell, you get a ton of benefits.
 
-- Simple to test the base functions (just Haskell! Can use quickcheck)
-- State machines are modeled in a convenient form using Mealy machines. Enabled
-  pipelining.
-- Something else here, ssshhhh it is super secret.
+- Strong (dependently typed!) type system.
+- Complicated FPGA state can be modeled with a Mealy machine, which is
+  basically just `StateT`!
+- `Applicative`, `Monad`, etc can be used to create convenient abstractions.
+- The base functions can be tested like any other Haskell function (Quickcheck!)
+- Resulting hardware can be simulated down to the picosecond using Clash and
+  other tools.
 
 
-NN actually on the chip
------------------------
+Quadrant Neural Network that is programmed on the chip
+------------------------------------------------------
 
 Neural network we actually have on the chip! It runs the whole network _in one
 clock cycle_ at 50 MHz (20 ns!)
@@ -330,6 +355,7 @@ clock cycle_ at 50 MHz (20 ns!)
 
 Rust program to interact with the FPGA
 ======================================
+
 
 The Big Picture -- Safe Control of Our FPGA Hardware
 ----------------------------------------------------
