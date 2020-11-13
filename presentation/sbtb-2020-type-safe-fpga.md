@@ -608,8 +608,10 @@ impl Session for MmapSesh {
     // -- snip --
 ```
 
+
 Implementing `Session` for Memory-Mapped FPGA I/O
 -------------------------------------------------
+
 ```rust
     // -- snip --
     fn write<R: Writable>(
@@ -631,6 +633,7 @@ Point Quadrant Classifier: Visualization of Solution
 ----------------------------------------------------
 
 ![](./fig/nn-output.pdf)
+
 
 Point Quadrant Classifier: The Code
 -----------------------------------
@@ -655,6 +658,7 @@ fn run() -> FpgaApiResult<()> {
 
 Point Quadrant Classifier: The Code
 -----------------------------------
+
 ```rust
     // -- snip --
     // Quadrant 1.
@@ -680,7 +684,12 @@ Conclusion
 
 We are awesome.
 
+
 Questions?
 ----------
 
-Insert cute animal here
+Our slides and the code to do this yourself can be found at:
+
+https://github.com/ryanorendorff/sbtb-2020-type-safe-fpga
+
+<figure>![](./fig/question.jpg){ style="width: 70%; margin: auto;" }</figure>
