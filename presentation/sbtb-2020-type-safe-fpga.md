@@ -26,19 +26,47 @@ header-includes: |
   \newcommand{\smallnspace}{\vspace*{-0.4em}}
 ---
 
+
 Brief intro: Ryan Orendorff
 ---------------------------
+
+:::::::::::::: {.columns}
+::: {.column width="20%"}
+
+![](./fig/ryan_pic.jpg){ width=100 }
+
+:::
+::: {.column width="80%"}
+
+I am a Research Scientist at Facebook Reality Labs Research (FRLR) working on
+Brain Computer Interface (BCI) research.
+
+\
+
+- Has been researching novel image and data reconstruction methods in the
+  biomedical space for the last decade, usually using signal theory and linear
+  algebra.
+- Loves to poke around with theorem proving, programming language theory and
+  dependently typed languages such as Agda.
+
+:::
+::::::::::::::
+
+This work is done on personal time/equipment and is not sponsored by Facebook, nor is this talk related to work at Facebook.
+
+Repos and other talks can be found here: github.com/ryanorendorff/
+
 
 Brief intro: Daniel Hensley
 ---------------------------
 
 :::::::::::::: {.columns}
-::: {.column width="10%"}
+::: {.column width="20%"}
 
-![](./fig/daniel_pic.jpg){ width=50 }
+![](./fig/daniel_pic.jpg){ width=100 }
 
 :::
-::: {.column width="90%"}
+::: {.column width="80%"}
 
 I currently manage the software team at Magnetic Insight, Inc. (MI). We build
 medical imaging scanners with a focus on magnetic particle imaging (MPI).
