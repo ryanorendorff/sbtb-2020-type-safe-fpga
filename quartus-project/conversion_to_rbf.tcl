@@ -1,0 +1,1 @@
+qexec "quartus_cpf -c conversion_to_rbf.cof" 
