@@ -635,7 +635,7 @@ fn main() {
 Whether we `panic` or not, our session will be `Drop`ped and our FPGA/HW will
 be in the appropriate state.
 
-Bringing tt all together in the session: helper traits
+Bringing it all together in the session: helper traits
 ------------------------------------------------------
 
 ```rust
@@ -654,7 +654,7 @@ impl<D: Data> Readable for Resource<D, ReadWrite> { // ...
 impl<D: Data> Writable for Resource<D, ReadWrite> { // ...
 ```
 
-Bringing tt all together: the `Session` trait
+Bringing it all together: the `Session` trait
 ---------------------------------------------
 
 :::::::::::::: {.columns}
@@ -789,6 +789,9 @@ Summary:
 
 **Takeaway**: Type systems and architectures that push guarantees to
 compile time are really great for modeling and interacting with HW.
+
+**Big thanks!** to our friend, colleague, and FPGA expert **Blayne Kettlewell**
+for his help on this project.
 
 Questions?
 ----------
