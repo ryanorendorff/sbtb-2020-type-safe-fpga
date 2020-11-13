@@ -68,16 +68,16 @@ Brief intro: Daniel Hensley
 :::
 ::: {.column width="80%"}
 
-I currently manage the software team at Magnetic Insight, Inc. (MI). We build
+I manage the software team at Magnetic Insight, Inc. (MI). We build
 medical imaging scanners with a focus on magnetic particle imaging (MPI).
 
 \
 
 - Background in signal processing, image reconstruction, applied math, and
   electromagnetic physics.
-- At MI, we have a lot of embedded and HW-facing code to operate big,
-  scary machines. Correctness is very important!
-- We've used FPGAs and Rust to great effect at MI.
+- Experience working on embedded and HW-facing code to operate big, scary
+  machines. Correctness is very important!
+- I've worked with FPGAs and Rust to great effect in production applications.
 
 :::
 ::::::::::::::
@@ -485,8 +485,7 @@ Generically modeling FPGA resources with traits and typestates
 Traits are one of the anchors of the Rust type system. They allow you to define
 shared behavior and constraints for sets of types.
 
-They are similar to typeclasses in Haskell, interfaces in Java, and traits in
-Scala.
+They are similar to interfaces and typeclasses in other languages.
 
 Encoding the data type/primitive with a trait
 ---------------------------------------------
