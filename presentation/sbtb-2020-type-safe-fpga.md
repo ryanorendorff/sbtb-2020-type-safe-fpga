@@ -197,7 +197,7 @@ data LayerTransition (i :: Nat) (o :: Nat) a =
 We can compose layers using a dependently typed list called `Network`
 ---------------------------------------------------------------------
 
-Now we will create a list of layers by making a list of `LayerTransition`s.
+Now we will create a non-empty list of `LayerTransition`s using a GADT[^2].
 
 ```haskell
 data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
@@ -218,6 +218,7 @@ data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
           -> Network i (h ': hs) o a
 ```
 
+[^2]: Inspired by [Justin Le's](https://blog.jle.im/entry/practical-dependent-types-in-haskell-1.html) dependent type NN structure.
 
 Using `runLayer` to move from one layer in the NN to the next
 -------------------------------------------------------------
