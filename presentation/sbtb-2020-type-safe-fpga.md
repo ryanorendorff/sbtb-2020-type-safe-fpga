@@ -23,6 +23,7 @@ header-includes: |
   \usefonttheme[onlymath]{serif}
 
   \newcommand{\undovspacepause}{\vspace*{-0.9em}}
+  \newcommand{\smallnspace}{\vspace*{-0.4em}}
 ---
 
 
@@ -44,11 +45,15 @@ In this talk, we will go through
 Architecture
 ------------
 
-We will be implementing a dense neural network on an Intel Cyclone V chip, which
-has both an ARM processor and FPGA on one chip (SoC).
+We will implement a neural network _as hardware_ on a Cyclone V chip.
+
+\smallnspace
 
 ![](./fig/chip.pdf)
 
+Implementing algorithms in hardware has several advantages:
+
+\undovspacepause
 
 - Low power
 - High throughput (GPU-like or better)
