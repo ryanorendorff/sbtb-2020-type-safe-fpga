@@ -1,10 +1,11 @@
 ---
-title: Programming ML algorithms in hardware, sanely 
-subtitle: using Haskell and Rust! 
-author: |
-  Daniel Hensley and Ryan Orendorff (https://git.io/JkTzb)
+title: Programming ML algorithms in hardware,
+subtitle: sanely, using Haskell and Rust!
+author: Daniel Hensley and Ryan Orendorff
 date: November 13th, 2020
+institute: github.com/ryanorendorff/sbtb-2020-type-safe-fpga
 theme: metropolis
+monofont: "Iosevka"
 header-includes: |
   \definecolor{BerkeleyBlue}{RGB}{0,50,98}
   \definecolor{FoundersRock}{RGB}{59,126,161}
@@ -35,8 +36,9 @@ TODO: Figure out how to add newline with the presentation URL in the author
 
 In this talk, we will go through
 
-- Basics of how to implement a neural network using Clash.
-- How to make accessing the FPGA safe using Rust.
+- Overview of forward propagation for neural networks
+- How to implement forward propagation using Clash on an FPGA.
+- How to make accessing the FPGA safely using Rust.
 
 
 Architecture
@@ -49,7 +51,7 @@ has both an ARM processor and FPGA on one chip (SoC).
 
 
 - Low power
-- High throughput (GPU-like level)
+- High throughput (GPU-like or better)
 - Deterministic timing
 
 
@@ -166,29 +168,29 @@ type Matrix m n a = Vec m (Vec n a)
 -- Matrix vector multiply: Mx
 (#>) :: (KnownNat m, KnownNat n, Num a)
      => Matrix m n a -> Vec n a -> Vec m a
-(#>) m v = map (<.> v) m
+(#>) m x = map (<.> x) m
 ```
 
 
-With the basics down, let's define the neural network type
-----------------------------------------------------------
+Encoding the layer as a type called `LayerTransition`
+-----------------------------------------------------
 
 Now that we have the basic linear algebra operators down, lets store everything
 we need for the $y = g(Mx + b)$.
 
 ```haskell
 -- Transition of size m to size n
-data LayerTransition (m :: Nat) (n :: Nat) a =
+data LayerTransition (i :: Nat) (o :: Nat) a =
   LayerTransition
-          { b :: Vec n a      -- Bias b
-          , m :: Matrix n m a -- Connections M
+          { m :: Matrix o i a -- Connections M
+          , b :: Vec o a      -- Bias b
           , g :: a -> a       -- Activation function g
           }
 ```
 
 
-We can compose layers using a dependently typed list
-----------------------------------------------------
+We can compose layers using a dependently typed list called `Network`
+---------------------------------------------------------------------
 
 Now we will create a list of layers by making a list of `LayerTransition`s.
 
@@ -212,8 +214,8 @@ data Network (i :: Nat) (hs :: [Nat]) (o :: Nat) a where
 ```
 
 
-Running a `LayerTransition`
----------------------------
+Using `runLayer` to move from one layer in the NN to the next
+-------------------------------------------------------------
 
 We can now run a layer transition by applying our equation $y = g(Mx + b)$ to
 some input vector $x$ to output vector $y$.
@@ -221,18 +223,18 @@ some input vector $x$ to output vector $y$.
 ```haskell
 runLayer :: (KnownNat i, KnownNat o, Num a)
          => (LayerTransition i o a)
-         -> Vec i a
-         -> Vec o a
-runLayer (LayerTransition b m g) x =
+         -> Vec i a -- Input nodes
+         -> Vec o a -- Output nodes
+runLayer (LayerTransition m b g) x =
   map g $ m #> x <+> b
 -- Precisely y = g(Mx + b) from before!
 ```
 
 
-Clash Run Network
------------------
+`runNet` is a fold that allows us to process all the layers
+-----------------------------------------------------------
 
-Now we can run our network by moving data from one layer to the nxt
+Now we can run our network by moving data from one layer to the next.
 
 ```haskell
 runNet :: (KnownNat i, KnownNat o, Num a, Ord a)
@@ -254,8 +256,8 @@ runNet (l :>> n) v = runNet n (runLayer l v)
 ```
 
 
-Composing Layers
-----------------
+Layers can be composed using `:>>`, only with matching layer sizes!
+-------------------------------------------------------------------
 
 Let's suppose we have the following four layer neural network.
 
@@ -347,8 +349,8 @@ Since Clash is mostly just Haskell, you get a ton of benefits.
   other tools.
 
 
-Quadrant Neural Network that is programmed on the chip
-------------------------------------------------------
+Quadrant detection neural network that Rust will interact with
+--------------------------------------------------------------
 
 Neural network we actually have on the chip! It runs the whole network _in one
 clock cycle_ at 50 MHz (20 ns!)
