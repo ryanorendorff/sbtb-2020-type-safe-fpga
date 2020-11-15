@@ -46,6 +46,19 @@ ergonomic and compile time-validated interface to the Clash validated FPGA
 hardware.
 
 
+## File layout
+
+This repo is broken out into the following directories:
+
+- `examples/`: Examples of specific type-level Clash features.
+- `ip/`: Basic Clash blocks. For example, this contains the dot product, the
+  neural network, and a few other blocks.
+- `nixos/`: A description of how to get a nixos VM started with Quartus installed.
+- `presentation/`: Presentation code. Can be compiled with `nix-build presentation`.
+- `quartus-project/`: Instructions for how to copy the results of the Clash
+  `ip` folder onto the DE10 nano, as well as a quickstart Quartus project.
+- `rust/`: Type safe access to the FPGA.
+
 ## Tutorials for using Quartus
 
 Tutorials for using Quartus can be found at the following URL:
