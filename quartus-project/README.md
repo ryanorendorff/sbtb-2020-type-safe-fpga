@@ -4,7 +4,8 @@ Compiling Clash programs to the DE10 Nano
 This folder contains a basic project that connects the forward propagation
 neural network written in Clash to the DE10 Nano, connected through the Avalon
 interconnect framework on Intel FPGAs. The contained quartus project is
-automatically configered for the HPS (ARM) processor with the correct pins.
+automatically configered for the HPS (32-bit ARM-A9) processor with the correct
+pins.
 
 1. Use clash to compile the `RunNetwork.hs` file in the `ip` folder using
    `clash RunNetwork.hs --verilog`.
